@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import backdropImage from '@/assets/museum-backdrop.jpg';
+import schoolLogo from '@/assets/school-of-law-logo.svg';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -232,6 +233,7 @@ function Bench({ position }: { position: [number, number, number] }) {
 
 export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
   const backdropTexture = useTexture(backdropImage);
+  const logoTexture = useTexture(schoolLogo);
   const particlesRef = useRef<THREE.Points>(null);
 
   const particlesGeometry = useMemo(() => {
@@ -252,10 +254,17 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
 
   backdropTexture.anisotropy = 8;
   backdropTexture.colorSpace = THREE.SRGBColorSpace;
+  
+  logoTexture.anisotropy = 8;
+  logoTexture.colorSpace = THREE.SRGBColorSpace;
 
   const backdropAspect = 1600 / 1066;
   const backdropHeight = 12;
   const backdropWidth = backdropHeight * backdropAspect;
+  
+  const logoAspect = 577.88 / 199.75;
+  const logoWidth = 12;
+  const logoHeight = logoWidth / logoAspect;
 
   return (
     <>
@@ -299,6 +308,18 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[60, 60]} />
         <meshStandardMaterial color="#cfd4db" metalness={0.05} roughness={0.92} />
+      </mesh>
+      
+      {/* Logo on floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 2]}>
+        <planeGeometry args={[logoWidth, logoHeight]} />
+        <meshStandardMaterial 
+          map={logoTexture}
+          transparent
+          opacity={0.9}
+          metalness={0.1}
+          roughness={0.8}
+        />
       </mesh>
 
       {/* Ceiling */}
