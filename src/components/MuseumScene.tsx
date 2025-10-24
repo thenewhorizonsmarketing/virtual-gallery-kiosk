@@ -73,10 +73,10 @@ function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClic
         />
       </mesh>
 
-      {/* Label */}
-      <mesh position={[0, 1.3, 0.3]}>
-        <planeGeometry args={[2.2, 0.9]} />
-        <meshBasicMaterial transparent opacity={0}>
+      {/* Label above door */}
+      <mesh position={[0, 2.2, 0.2]}>
+        <planeGeometry args={[2.6, 0.7]} />
+        <meshBasicMaterial transparent>
           <primitive attach="map" object={createLabelTexture(doorData.key)} />
         </meshBasicMaterial>
       </mesh>
@@ -94,11 +94,59 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = 'rgba(0,0,0,0.7)';
-  ctx.shadowBlur = 14;
-  ctx.font = '800 72px system-ui, -apple-system, Segoe UI, Roboto';
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  ctx.fillStyle = '#c9a227';
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 16;
+  
+  // Handle text wrapping for long titles
+  const maxWidth = canvas.width - 60;
+  let fontSize = 56;
+  ctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto`;
+  
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+  
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  
+  // Adjust font size if too many lines
+  while (lines.length > 2 && fontSize > 32) {
+    fontSize -= 4;
+    ctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto`;
+    lines.length = 0;
+    currentLine = '';
+    
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+  }
+  
+  const lineHeight = fontSize * 1.2;
+  const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+  
+  lines.forEach((line, i) => {
+    ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+  });
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.anisotropy = 8;
