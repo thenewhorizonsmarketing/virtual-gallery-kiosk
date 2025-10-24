@@ -94,14 +94,14 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#c9a227';
+  ctx.fillStyle = '#ffffff';
   ctx.shadowColor = 'rgba(0,0,0,0.8)';
   ctx.shadowBlur = 16;
   
   // Handle text wrapping for long titles
   const maxWidth = canvas.width - 60;
-  let fontSize = 56;
-  ctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto`;
+  let fontSize = 112;
+  ctx.font = `900 ${fontSize}px Cinzel, Georgia, serif`;
   
   const words = text.split(' ');
   const lines: string[] = [];
@@ -121,9 +121,9 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   if (currentLine) lines.push(currentLine);
   
   // Adjust font size if too many lines
-  while (lines.length > 2 && fontSize > 32) {
-    fontSize -= 4;
-    ctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto`;
+  while (lines.length > 2 && fontSize > 64) {
+    fontSize -= 8;
+    ctx.font = `900 ${fontSize}px Cinzel, Georgia, serif`;
     lines.length = 0;
     currentLine = '';
     
