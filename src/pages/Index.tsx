@@ -13,12 +13,13 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
       { title: 'Class of 2015', description: 'A decade of success' },
     ],
   },
-  Publications: {
-    title: 'Publications',
+  'Publications (Amicus, Legal Eye, Law Review, Directory)': {
+    title: 'Publications (Amicus, Legal Eye, Law Review, Directory)',
     items: [
       { title: 'Amicus Newsletter', description: 'Latest legal insights and updates' },
       { title: 'Legal Eye Journal', description: 'Student perspectives on law' },
       { title: 'Law Review', description: 'Scholarly articles and analysis' },
+      { title: 'Law School Directory', description: 'Comprehensive faculty and student listings' },
     ],
   },
   'Historical Photos/Archives': {
@@ -42,6 +43,7 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 const Index = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [year] = useState(new Date().getFullYear());
+  const [cameraKey, setCameraKey] = useState(0);
 
   const handleDoorClick = (roomKey: string) => {
     setSelectedRoom(roomKey);
@@ -49,6 +51,11 @@ const Index = () => {
 
   const handleCloseRoom = () => {
     setSelectedRoom(null);
+  };
+
+  const handleResetCamera = () => {
+    setSelectedRoom(null);
+    setCameraKey(prev => prev + 1); // Force camera reset by remounting Canvas
   };
 
   const handleFullscreen = () => {
@@ -74,7 +81,7 @@ const Index = () => {
             Fullscreen
           </Button>
           <Button
-            onClick={handleCloseRoom}
+            onClick={handleResetCamera}
             className="bg-accent font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90"
           >
             Home
@@ -86,6 +93,7 @@ const Index = () => {
       <main className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
           <Canvas
+            key={cameraKey}
             camera={{ position: [0, 1.75, 10.5], fov: 55 }}
             shadows
             gl={{ antialias: true, powerPreference: 'high-performance' }}
@@ -98,7 +106,7 @@ const Index = () => {
         <div className="pointer-events-none absolute inset-0 z-[2]">
           <div className="flex gap-2 p-3">
             <Button
-              onClick={handleCloseRoom}
+              onClick={handleResetCamera}
               className="pointer-events-auto bg-accent font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90"
             >
               Reset View

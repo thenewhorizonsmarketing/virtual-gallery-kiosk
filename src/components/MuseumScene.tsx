@@ -6,11 +6,12 @@ import backdropImage from '@/assets/museum-backdrop.jpg';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
+  onResetCamera?: () => void;
 }
 
 const DOORS = [
   { key: 'Alumni/Class Composites', x: -6.5, color: '#c9a227' },
-  { key: 'Publications', x: -2.2, color: '#c9a227' },
+  { key: 'Publications (Amicus, Legal Eye, Law Review, Directory)', x: -2.2, color: '#c9a227' },
   { key: 'Historical Photos/Archives', x: 2.2, color: '#c9a227' },
   { key: 'Faculty & Staff', x: 6.5, color: '#c9a227' },
 ];
@@ -181,7 +182,7 @@ function Bench({ position }: { position: [number, number, number] }) {
   );
 }
 
-export function MuseumScene({ onDoorClick }: MuseumSceneProps) {
+export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
   const backdropTexture = useTexture(backdropImage);
   const particlesRef = useRef<THREE.Points>(null);
 
@@ -326,6 +327,7 @@ export function MuseumScene({ onDoorClick }: MuseumSceneProps) {
         rotateSpeed={0.5}
         enableDamping
         dampingFactor={0.06}
+        makeDefault
       />
     </>
   );
