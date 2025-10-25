@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { MuseumScene } from '@/components/MuseumScene';
+import MarbleDoors from '@/components/MarbleDoors';
 import { LibraryRoom } from '@/components/rooms/LibraryRoom';
 import { ArchiveRoom } from '@/components/rooms/ArchiveRoom';
 import { OfficeRoom } from '@/components/rooms/OfficeRoom';
@@ -53,8 +53,8 @@ const Index = () => {
 
   const handleDoorClick = (roomKey: string) => {
     setSelectedRoom(roomKey);
-    setActiveRoom(null);
-    setShowRoomPanel(false); // Hide panel during transition
+    setActiveRoom(roomKey);
+    setShowRoomPanel(true);
   };
 
   const handleCloseRoom = () => {
@@ -62,17 +62,11 @@ const Index = () => {
     setActiveRoom(null);
     setShowRoomPanel(false);
   };
-  
-  const handleZoomComplete = (roomKey: string) => {
-    setActiveRoom(roomKey);
-    setShowRoomPanel(true);
-  };
 
   const handleResetCamera = () => {
     setSelectedRoom(null);
     setActiveRoom(null);
     setShowRoomPanel(false);
-    setCameraKey(prev => prev + 1); // Force camera reset by remounting Canvas
   };
 
   const handleFullscreen = () => {
@@ -122,31 +116,15 @@ const Index = () => {
 
       {/* 3D Scene */}
       <main className="relative flex-1 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
-          {/* Museum Hall - visible until room becomes active */}
-          <div style={{ display: activeRoom ? 'none' : 'block', width: '100%', height: '100%' }}>
-            <Canvas
-              key={cameraKey}
-              camera={{ position: [0, 1.75, 10.5], fov: 55 }}
-              shadows
-              gl={{ 
-                antialias: true, 
-                powerPreference: 'high-performance',
-                toneMapping: 2, // ACESFilmicToneMapping
-                toneMappingExposure: 0.9
-              }}
-            >
-              <MuseumScene 
-                onDoorClick={handleDoorClick} 
-                selectedRoom={selectedRoom}
-                onZoomComplete={handleZoomComplete}
-              />
-            </Canvas>
-          </div>
+        <div className="absolute inset-0">
+          {/* Marble Doors - visible when no room selected */}
+          {!activeRoom && (
+            <MarbleDoors onDoorClick={handleDoorClick} />
+          )}
 
-          {/* Destination Room - appears after zoom completes */}
+          {/* 3D Room - visible when room is selected */}
           {activeRoom && (
-            <div style={{ width: '100%', height: '100%' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
               <Canvas
                 camera={{ position: [0, 1.75, 12], fov: 60 }}
                 shadows
@@ -184,17 +162,14 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Hint text */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/30 px-4 py-2 font-bold tracking-wide text-muted backdrop-blur-sm">
-            Tap a doorway to enter • Alumni • Publications • Archives • Faculty
-          </div>
-
-          {/* Legend */}
-          <div className="absolute bottom-3 right-3 rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1429] to-[#0a1020] px-4 py-3 text-sm text-muted shadow-[0_14px_34px_rgba(0,0,0,0.45)]">
-            <div className="font-bold text-foreground">Navigation</div>
-            <div>Tap/Click door → enter room</div>
-            <div>Hold + drag → look around</div>
-          </div>
+          {/* Navigation hint - only show in 3D room */}
+          {activeRoom && (
+            <div className="absolute bottom-3 right-3 rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1429] to-[#0a1020] px-4 py-3 text-sm text-muted shadow-[0_14px_34px_rgba(0,0,0,0.45)]">
+              <div className="font-bold text-foreground">Navigation</div>
+              <div>Hold + drag → look around</div>
+              <div>Scroll → zoom in/out</div>
+            </div>
+          )}
         </div>
 
         {/* Room Panel */}
