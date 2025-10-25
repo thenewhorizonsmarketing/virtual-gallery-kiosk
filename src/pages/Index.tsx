@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { MuseumScene } from '@/components/MuseumScene';
+import { LibraryRoom } from '@/components/rooms/LibraryRoom';
+import { ArchiveRoom } from '@/components/rooms/ArchiveRoom';
+import { OfficeRoom } from '@/components/rooms/OfficeRoom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OrbitControls } from '@react-three/drei';
 
 const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string; description: string }> }> = {
   'Alumni/Class Composites': {
@@ -48,6 +52,7 @@ const Index = () => {
 
   const handleDoorClick = (roomKey: string) => {
     setSelectedRoom(roomKey);
+    setShowRoomPanel(false); // Hide panel during transition
   };
 
   const handleCloseRoom = () => {
@@ -71,6 +76,20 @@ const Index = () => {
   };
 
   const roomData = selectedRoom ? ROOM_CONTENT[selectedRoom] : null;
+  
+  // Map rooms to their 3D environments
+  const getRoomComponent = () => {
+    if (!selectedRoom) return null;
+    
+    if (selectedRoom.includes('Alumni') || selectedRoom.includes('Publications')) {
+      return <LibraryRoom />;
+    } else if (selectedRoom.includes('Historical') || selectedRoom.includes('Archives')) {
+      return <ArchiveRoom />;
+    } else if (selectedRoom.includes('Faculty')) {
+      return <OfficeRoom />;
+    }
+    return <LibraryRoom />; // Default fallback
+  };
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -98,23 +117,48 @@ const Index = () => {
       {/* 3D Scene */}
       <main className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
-          <Canvas
-            key={cameraKey}
-            camera={{ position: [0, 1.75, 10.5], fov: 55 }}
-            shadows
-            gl={{ 
-              antialias: true, 
-              powerPreference: 'high-performance',
-              toneMapping: 2, // ACESFilmicToneMapping
-              toneMappingExposure: 0.9
-            }}
-          >
-            <MuseumScene 
-              onDoorClick={handleDoorClick} 
-              selectedRoom={selectedRoom}
-              onZoomComplete={handleZoomComplete}
-            />
-          </Canvas>
+          {!selectedRoom ? (
+            <Canvas
+              key={cameraKey}
+              camera={{ position: [0, 1.75, 10.5], fov: 55 }}
+              shadows
+              gl={{ 
+                antialias: true, 
+                powerPreference: 'high-performance',
+                toneMapping: 2, // ACESFilmicToneMapping
+                toneMappingExposure: 0.9
+              }}
+            >
+              <MuseumScene 
+                onDoorClick={handleDoorClick} 
+                selectedRoom={selectedRoom}
+                onZoomComplete={handleZoomComplete}
+              />
+            </Canvas>
+          ) : (
+            <Canvas
+              camera={{ position: [0, 1.75, 12], fov: 60 }}
+              shadows
+              gl={{ 
+                antialias: true, 
+                powerPreference: 'high-performance',
+                toneMapping: 2,
+                toneMappingExposure: 0.9
+              }}
+            >
+              {getRoomComponent()}
+              <OrbitControls
+                enablePan={false}
+                enableZoom={true}
+                minDistance={5}
+                maxDistance={20}
+                minPolarAngle={Math.PI * 0.2}
+                maxPolarAngle={Math.PI * 0.48}
+                enableDamping
+                dampingFactor={0.05}
+              />
+            </Canvas>
+          )}
         </div>
 
         {/* Overlay controls */}
