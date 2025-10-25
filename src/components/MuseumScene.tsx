@@ -9,6 +9,7 @@ interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
   onResetCamera?: () => void;
   selectedRoom?: string | null;
+  onZoomComplete?: () => void;
 }
 
 const DOORS = [
@@ -232,7 +233,7 @@ function Bench({ position }: { position: [number, number, number] }) {
   );
 }
 
-export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom }: MuseumSceneProps) {
+export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   const backdropTexture = useTexture(backdropImage);
   const logoTexture = useTexture(schoolLogo);
   const particlesRef = useRef<THREE.Points>(null);
@@ -242,6 +243,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom }: Museum
   const initialCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
   const targetCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
   const isAnimating = useRef(false);
+  const hasNotifiedComplete = useRef(false);
 
   const particlesGeometry = useMemo(() => {
     const positions = new Float32Array(800 * 3);
@@ -264,8 +266,13 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom }: Museum
     camera.position.lerp(targetCameraPos.current, lerpFactor);
     
     // Check if animation is complete
-    if (camera.position.distanceTo(targetCameraPos.current) < 0.01) {
+    const distance = camera.position.distanceTo(targetCameraPos.current);
+    if (distance < 0.01 && isAnimating.current) {
       isAnimating.current = false;
+      if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
+        hasNotifiedComplete.current = true;
+        onZoomComplete();
+      }
     }
   });
   
@@ -277,11 +284,13 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom }: Museum
       if (door) {
         targetCameraPos.current.set(door.x, 1.8, -4.5); // Zoom close to door
         isAnimating.current = true;
+        hasNotifiedComplete.current = false;
       }
     } else {
       // Zoom back out to initial position
       targetCameraPos.current.copy(initialCameraPos.current);
       isAnimating.current = true;
+      hasNotifiedComplete.current = false;
     }
   }, [selectedRoom]);
 

@@ -42,6 +42,7 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 
 const Index = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [showRoomPanel, setShowRoomPanel] = useState(false);
   const [year] = useState(new Date().getFullYear());
   const [cameraKey, setCameraKey] = useState(0);
 
@@ -51,6 +52,11 @@ const Index = () => {
 
   const handleCloseRoom = () => {
     setSelectedRoom(null);
+    setShowRoomPanel(false);
+  };
+  
+  const handleZoomComplete = () => {
+    setShowRoomPanel(true);
   };
 
   const handleResetCamera = () => {
@@ -103,7 +109,11 @@ const Index = () => {
               toneMappingExposure: 0.9
             }}
           >
-            <MuseumScene onDoorClick={handleDoorClick} selectedRoom={selectedRoom} />
+            <MuseumScene 
+              onDoorClick={handleDoorClick} 
+              selectedRoom={selectedRoom}
+              onZoomComplete={handleZoomComplete}
+            />
           </Canvas>
         </div>
 
@@ -132,7 +142,7 @@ const Index = () => {
         </div>
 
         {/* Room Panel */}
-        {selectedRoom && roomData && (
+        {showRoomPanel && selectedRoom && roomData && (
           <div className="absolute inset-0 z-[3] grid place-items-center bg-black/80 backdrop-blur-sm">
             <Card className="h-[min(70vh,820px)] w-[min(1200px,92vw)] overflow-hidden border-2 border-primary/50 bg-card shadow-[0_28px_80px_rgba(0,0,0,0.6)]">
               <CardHeader className="flex flex-row items-center gap-3 bg-primary/90 text-primary-foreground">
