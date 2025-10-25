@@ -103,7 +103,7 @@ const Index = () => {
               toneMappingExposure: 0.9
             }}
           >
-            <MuseumScene onDoorClick={handleDoorClick} />
+            <MuseumScene onDoorClick={handleDoorClick} selectedRoom={selectedRoom} />
           </Canvas>
         </div>
 

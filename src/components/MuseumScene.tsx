@@ -8,6 +8,7 @@ import schoolLogo from '@/assets/school-of-law-logo.svg';
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
   onResetCamera?: () => void;
+  selectedRoom?: string | null;
 }
 
 const DOORS = [
@@ -231,10 +232,16 @@ function Bench({ position }: { position: [number, number, number] }) {
   );
 }
 
-export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
+export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom }: MuseumSceneProps) {
   const backdropTexture = useTexture(backdropImage);
   const logoTexture = useTexture(schoolLogo);
   const particlesRef = useRef<THREE.Points>(null);
+  const { camera } = useThree();
+  
+  // Store initial camera position
+  const initialCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
+  const isAnimating = useRef(false);
 
   const particlesGeometry = useMemo(() => {
     const positions = new Float32Array(800 * 3);
@@ -246,11 +253,37 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
     return geometry;
   }, []);
 
+  // Handle camera zoom animations
   useFrame((state, delta) => {
     if (particlesRef.current) {
       particlesRef.current.rotation.y += delta * 0.02;
     }
+    
+    // Smooth camera transition with easing
+    const lerpFactor = 1 - Math.pow(0.001, delta); // Smooth easing
+    camera.position.lerp(targetCameraPos.current, lerpFactor);
+    
+    // Check if animation is complete
+    if (camera.position.distanceTo(targetCameraPos.current) < 0.01) {
+      isAnimating.current = false;
+    }
   });
+  
+  // Update target position when room selection changes
+  useEffect(() => {
+    if (selectedRoom) {
+      // Find the door and zoom into it
+      const door = DOORS.find(d => d.key === selectedRoom);
+      if (door) {
+        targetCameraPos.current.set(door.x, 1.8, -4.5); // Zoom close to door
+        isAnimating.current = true;
+      }
+    } else {
+      // Zoom back out to initial position
+      targetCameraPos.current.copy(initialCameraPos.current);
+      isAnimating.current = true;
+    }
+  }, [selectedRoom]);
 
   backdropTexture.anisotropy = 8;
   backdropTexture.colorSpace = THREE.SRGBColorSpace;
@@ -383,5 +416,5 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
   );
 }
 
-// Add missing import
-import { useState } from 'react';
+// Add missing imports
+import { useState, useEffect } from 'react';
