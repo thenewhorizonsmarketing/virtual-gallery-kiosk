@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import MarbleDoors from '@/components/MarbleDoors';
 import { LibraryRoom } from '@/components/rooms/LibraryRoom';
 import { ArchiveRoom } from '@/components/rooms/ArchiveRoom';
 import { OfficeRoom } from '@/components/rooms/OfficeRoom';
+import MarbleDoors from '@/components/MarbleDoors';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrbitControls } from '@react-three/drei';
@@ -46,46 +46,30 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 
 const Index = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [showRoomPanel, setShowRoomPanel] = useState(false);
   const [year] = useState(new Date().getFullYear());
-  const [cameraKey, setCameraKey] = useState(0);
 
   const handleDoorClick = (roomKey: string) => {
     setSelectedRoom(roomKey);
-    setActiveRoom(roomKey);
     setShowRoomPanel(true);
   };
 
   const handleCloseRoom = () => {
     setSelectedRoom(null);
-    setActiveRoom(null);
     setShowRoomPanel(false);
-  };
-
-  const handleResetCamera = () => {
-    setSelectedRoom(null);
-    setActiveRoom(null);
-    setShowRoomPanel(false);
-  };
-
-  const handleFullscreen = () => {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
-    }
   };
 
   const roomData = selectedRoom ? ROOM_CONTENT[selectedRoom] : null;
   
   // Map rooms to their 3D environments
   const getRoomComponent = () => {
-    if (!activeRoom) return null;
+    if (!selectedRoom) return null;
     
-    if (activeRoom.includes('Alumni') || activeRoom.includes('Publications')) {
+    if (selectedRoom.includes('Alumni') || selectedRoom.includes('Publications')) {
       return <LibraryRoom />;
-    } else if (activeRoom.includes('Historical') || activeRoom.includes('Archives')) {
+    } else if (selectedRoom.includes('Historical') || selectedRoom.includes('Archives')) {
       return <ArchiveRoom />;
-    } else if (activeRoom.includes('Faculty')) {
+    } else if (selectedRoom.includes('Faculty')) {
       return <OfficeRoom />;
     }
     return <LibraryRoom />; // Default fallback
@@ -96,81 +80,40 @@ const Index = () => {
       {/* Header */}
       <header className="relative z-10 flex items-center gap-4 bg-gradient-to-b from-primary to-primary/90 px-5 py-4 text-primary-foreground shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
         <h1 className="text-2xl font-black tracking-tight md:text-3xl">
-          MC Virtual Museum — 3D Gallery
+          MC Virtual Museum — Gallery
         </h1>
-        <div className="ml-auto flex gap-3">
-          <Button
-            onClick={handleFullscreen}
-            className="bg-accent font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90"
-          >
-            Fullscreen
-          </Button>
-          <Button
-            onClick={handleResetCamera}
-            className="bg-accent font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90"
-          >
-            Home
-          </Button>
-        </div>
       </header>
 
-      {/* 3D Scene */}
+      {/* Main Content */}
       <main className="relative flex-1 overflow-hidden">
-        <div className="absolute inset-0">
-          {/* Marble Doors - visible when no room selected */}
-          {!activeRoom && (
-            <MarbleDoors onDoorClick={handleDoorClick} />
-          )}
-
-          {/* 3D Room - visible when room is selected */}
-          {activeRoom && (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
-              <Canvas
-                camera={{ position: [0, 1.75, 12], fov: 60 }}
-                shadows
-                gl={{ 
-                  antialias: true, 
-                  powerPreference: 'high-performance',
-                  toneMapping: 2,
-                  toneMappingExposure: 0.9
-                }}
-              >
-                {getRoomComponent()}
-                <OrbitControls
-                  enablePan={false}
-                  enableZoom={true}
-                  minDistance={5}
-                  maxDistance={20}
-                  minPolarAngle={Math.PI * 0.2}
-                  maxPolarAngle={Math.PI * 0.48}
-                  enableDamping
-                  dampingFactor={0.05}
-                />
-              </Canvas>
-            </div>
-          )}
-        </div>
-
-        {/* Overlay controls */}
-        <div className="pointer-events-none absolute inset-0 z-[2]">
-          <div className="flex gap-2 p-3">
-            <Button
-              onClick={handleResetCamera}
-              className="pointer-events-auto bg-accent font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90"
+        {!selectedRoom ? (
+          <MarbleDoors onDoorClick={handleDoorClick} />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
+            <Canvas
+              camera={{ position: [0, 1.75, 12], fov: 60 }}
+              shadows
+              gl={{ 
+                antialias: true, 
+                powerPreference: 'high-performance',
+                toneMapping: 2,
+                toneMappingExposure: 0.9
+              }}
             >
-              Reset View
-            </Button>
+              {getRoomComponent()}
+              <OrbitControls
+                enablePan={false}
+                enableZoom={true}
+                minDistance={5}
+                maxDistance={20}
+                minPolarAngle={Math.PI * 0.2}
+                maxPolarAngle={Math.PI * 0.48}
+                enableDamping
+                dampingFactor={0.05}
+              />
+            </Canvas>
           </div>
-
-          {/* Navigation hint - only show in 3D room */}
-          {activeRoom && (
-            <div className="absolute bottom-3 right-3 rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1429] to-[#0a1020] px-4 py-3 text-sm text-muted shadow-[0_14px_34px_rgba(0,0,0,0.45)]">
-              <div className="font-bold text-foreground">Navigation</div>
-              <div>Hold + drag → look around</div>
-              <div>Scroll → zoom in/out</div>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Room Panel */}
         {showRoomPanel && selectedRoom && roomData && (
@@ -204,12 +147,6 @@ const Index = () => {
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="flex items-center justify-between bg-primary/80 px-4 py-2 text-sm text-muted-foreground">
-        <div>© {year} Mississippi College — Kiosk Mode</div>
-        <div>Idle returns to Home</div>
-      </footer>
     </div>
   );
 };
