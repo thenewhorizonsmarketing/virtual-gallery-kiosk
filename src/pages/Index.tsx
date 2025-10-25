@@ -85,13 +85,13 @@ const Index = () => {
   
   // Map rooms to their 3D environments
   const getRoomComponent = () => {
-    if (!selectedRoom) return null;
+    if (!activeRoom) return null;
     
-    if (selectedRoom.includes('Alumni') || selectedRoom.includes('Publications')) {
+    if (activeRoom.includes('Alumni') || activeRoom.includes('Publications')) {
       return <LibraryRoom />;
-    } else if (selectedRoom.includes('Historical') || selectedRoom.includes('Archives')) {
+    } else if (activeRoom.includes('Historical') || activeRoom.includes('Archives')) {
       return <ArchiveRoom />;
-    } else if (selectedRoom.includes('Faculty')) {
+    } else if (activeRoom.includes('Faculty')) {
       return <OfficeRoom />;
     }
     return <LibraryRoom />; // Default fallback
@@ -123,49 +123,53 @@ const Index = () => {
       {/* 3D Scene */}
       <main className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
-          {/* Museum Hall - always mounted for smooth zooms */}
-          <Canvas
-            key={cameraKey}
-            camera={{ position: [0, 1.75, 10.5], fov: 55 }}
-            shadows
-            gl={{ 
-              antialias: true, 
-              powerPreference: 'high-performance',
-              toneMapping: 2, // ACESFilmicToneMapping
-              toneMappingExposure: 0.9
-            }}
-          >
-            <MuseumScene 
-              onDoorClick={handleDoorClick} 
-              selectedRoom={selectedRoom}
-              onZoomComplete={handleZoomComplete}
-            />
-          </Canvas>
-
-          {/* Destination Room - appears after zoom completes */}
-          {activeRoom && (
+          {/* Museum Hall - visible until room becomes active */}
+          <div style={{ display: activeRoom ? 'none' : 'block', width: '100%', height: '100%' }}>
             <Canvas
-              camera={{ position: [0, 1.75, 12], fov: 60 }}
+              key={cameraKey}
+              camera={{ position: [0, 1.75, 10.5], fov: 55 }}
               shadows
               gl={{ 
                 antialias: true, 
                 powerPreference: 'high-performance',
-                toneMapping: 2,
+                toneMapping: 2, // ACESFilmicToneMapping
                 toneMappingExposure: 0.9
               }}
             >
-              {getRoomComponent()}
-              <OrbitControls
-                enablePan={false}
-                enableZoom={true}
-                minDistance={5}
-                maxDistance={20}
-                minPolarAngle={Math.PI * 0.2}
-                maxPolarAngle={Math.PI * 0.48}
-                enableDamping
-                dampingFactor={0.05}
+              <MuseumScene 
+                onDoorClick={handleDoorClick} 
+                selectedRoom={selectedRoom}
+                onZoomComplete={handleZoomComplete}
               />
             </Canvas>
+          </div>
+
+          {/* Destination Room - appears after zoom completes */}
+          {activeRoom && (
+            <div style={{ width: '100%', height: '100%' }}>
+              <Canvas
+                camera={{ position: [0, 1.75, 12], fov: 60 }}
+                shadows
+                gl={{ 
+                  antialias: true, 
+                  powerPreference: 'high-performance',
+                  toneMapping: 2,
+                  toneMappingExposure: 0.9
+                }}
+              >
+                {getRoomComponent()}
+                <OrbitControls
+                  enablePan={false}
+                  enableZoom={true}
+                  minDistance={5}
+                  maxDistance={20}
+                  minPolarAngle={Math.PI * 0.2}
+                  maxPolarAngle={Math.PI * 0.48}
+                  enableDamping
+                  dampingFactor={0.05}
+                />
+              </Canvas>
+            </div>
           )}
         </div>
 
