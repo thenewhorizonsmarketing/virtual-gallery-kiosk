@@ -9,7 +9,7 @@ interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
   onResetCamera?: () => void;
   selectedRoom?: string | null;
-  onZoomComplete?: () => void;
+  onZoomComplete?: (roomKey: string) => void;
 }
 
 const DOORS = [
@@ -271,7 +271,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       isAnimating.current = false;
       if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
         hasNotifiedComplete.current = true;
-        onZoomComplete();
+        onZoomComplete(selectedRoom);
       }
     }
   });

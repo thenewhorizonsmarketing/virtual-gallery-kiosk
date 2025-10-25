@@ -46,26 +46,32 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 
 const Index = () => {
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [showRoomPanel, setShowRoomPanel] = useState(false);
   const [year] = useState(new Date().getFullYear());
   const [cameraKey, setCameraKey] = useState(0);
 
   const handleDoorClick = (roomKey: string) => {
     setSelectedRoom(roomKey);
+    setActiveRoom(null);
     setShowRoomPanel(false); // Hide panel during transition
   };
 
   const handleCloseRoom = () => {
     setSelectedRoom(null);
+    setActiveRoom(null);
     setShowRoomPanel(false);
   };
   
-  const handleZoomComplete = () => {
+  const handleZoomComplete = (roomKey: string) => {
+    setActiveRoom(roomKey);
     setShowRoomPanel(true);
   };
 
   const handleResetCamera = () => {
     setSelectedRoom(null);
+    setActiveRoom(null);
+    setShowRoomPanel(false);
     setCameraKey(prev => prev + 1); // Force camera reset by remounting Canvas
   };
 
@@ -117,25 +123,27 @@ const Index = () => {
       {/* 3D Scene */}
       <main className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a2d4a] via-[#121a2d] to-[#0d1420]">
-          {!selectedRoom ? (
-            <Canvas
-              key={cameraKey}
-              camera={{ position: [0, 1.75, 10.5], fov: 55 }}
-              shadows
-              gl={{ 
-                antialias: true, 
-                powerPreference: 'high-performance',
-                toneMapping: 2, // ACESFilmicToneMapping
-                toneMappingExposure: 0.9
-              }}
-            >
-              <MuseumScene 
-                onDoorClick={handleDoorClick} 
-                selectedRoom={selectedRoom}
-                onZoomComplete={handleZoomComplete}
-              />
-            </Canvas>
-          ) : (
+          {/* Museum Hall - always mounted for smooth zooms */}
+          <Canvas
+            key={cameraKey}
+            camera={{ position: [0, 1.75, 10.5], fov: 55 }}
+            shadows
+            gl={{ 
+              antialias: true, 
+              powerPreference: 'high-performance',
+              toneMapping: 2, // ACESFilmicToneMapping
+              toneMappingExposure: 0.9
+            }}
+          >
+            <MuseumScene 
+              onDoorClick={handleDoorClick} 
+              selectedRoom={selectedRoom}
+              onZoomComplete={handleZoomComplete}
+            />
+          </Canvas>
+
+          {/* Destination Room - appears after zoom completes */}
+          {activeRoom && (
             <Canvas
               camera={{ position: [0, 1.75, 12], fov: 60 }}
               shadows
