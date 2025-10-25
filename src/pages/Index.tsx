@@ -96,7 +96,12 @@ const Index = () => {
             key={cameraKey}
             camera={{ position: [0, 1.75, 10.5], fov: 55 }}
             shadows
-            gl={{ antialias: true, powerPreference: 'high-performance' }}
+            gl={{ 
+              antialias: true, 
+              powerPreference: 'high-performance',
+              toneMapping: 2, // ACESFilmicToneMapping
+              toneMappingExposure: 0.9
+            }}
           >
             <MuseumScene onDoorClick={handleDoorClick} />
           </Canvas>

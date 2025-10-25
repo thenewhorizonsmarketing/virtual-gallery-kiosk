@@ -41,7 +41,7 @@ function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClic
       {/* Frame */}
       <mesh position={[0, 0, -0.01]} castShadow receiveShadow>
         <boxGeometry args={[2.4, 3.8, 0.15]} />
-        <meshStandardMaterial color="#0f2244" metalness={0.35} roughness={0.4} />
+        <meshStandardMaterial color="#4A5562" metalness={0.15} roughness={0.6} />
       </mesh>
 
       {/* Door panel */}
@@ -55,8 +55,8 @@ function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClic
       >
         <boxGeometry args={[2.2, 3.6, 0.25]} />
         <meshStandardMaterial
-          color="#0b1a34"
-          metalness={0.2}
+          color="#2C3744"
+          metalness={0.1}
           roughness={0.7}
           emissive={doorData.color}
           emissiveIntensity={0.15}
@@ -169,7 +169,7 @@ function RotatingArtifact({ position }: { position: [number, number, number] }) 
       {/* Plinth */}
       <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.1, 0.8, 1.1]} />
-        <meshStandardMaterial color="#e9ecef" roughness={0.9} />
+        <meshStandardMaterial color="#D4D8DD" roughness={0.5} metalness={0.0} />
       </mesh>
 
       {/* Glass vitrine */}
@@ -187,7 +187,7 @@ function RotatingArtifact({ position }: { position: [number, number, number] }) 
       {/* Stand */}
       <mesh position={[0, 1.0, 0]}>
         <cylinderGeometry args={[0.08, 0.08, 0.25, 24]} />
-        <meshStandardMaterial color="#b1b7c3" roughness={0.6} />
+        <meshStandardMaterial color="#95A0AD" roughness={0.4} metalness={0.0} />
       </mesh>
 
       {/* Artifact */}
@@ -204,7 +204,7 @@ function RotatingArtifact({ position }: { position: [number, number, number] }) 
       {/* Plaque */}
       <mesh position={[0, 0.85, 0.62]}>
         <boxGeometry args={[0.7, 0.12, 0.02]} />
-        <meshStandardMaterial color="#0f2244" roughness={0.7} />
+        <meshStandardMaterial color="#4A5562" roughness={0.6} metalness={0.0} />
       </mesh>
     </group>
   );
@@ -216,16 +216,16 @@ function Bench({ position }: { position: [number, number, number] }) {
       {/* Seat */}
       <mesh position={[0, 0.48, 0]}>
         <boxGeometry args={[2.8, 0.18, 0.5]} />
-        <meshStandardMaterial color="#3a2a1a" roughness={0.6} />
+        <meshStandardMaterial color="#5A4A3A" roughness={0.6} />
       </mesh>
       {/* Legs */}
       <mesh position={[-1.1, 0.25, 0]}>
         <boxGeometry args={[0.12, 0.5, 0.4]} />
-        <meshStandardMaterial color="#1f1f1f" roughness={0.8} />
+        <meshStandardMaterial color="#3A3A3A" roughness={0.7} />
       </mesh>
       <mesh position={[1.1, 0.25, 0]}>
         <boxGeometry args={[0.12, 0.5, 0.4]} />
-        <meshStandardMaterial color="#1f1f1f" roughness={0.8} />
+        <meshStandardMaterial color="#3A3A3A" roughness={0.7} />
       </mesh>
     </group>
   );
@@ -268,46 +268,29 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
 
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.18} />
-      <hemisphereLight args={['#8793a4', '#0d1016', 0.35]} />
+      {/* Lighting - Cool Neutral Daylight */}
+      <ambientLight intensity={0.6} color="#BFC7D1" />
       
-      {/* Sun/Daylight */}
+      {/* Angled Sun for Long Diagonal Streaks */}
       <directionalLight
-        position={[7.5, 10.5, 3]}
-        intensity={0.55}
+        position={[20, 30, -15]}
+        intensity={2.0}
+        color="#ffffff"
         castShadow
-        shadow-mapSize={[4096, 4096]}
+        shadow-mapSize={[2048, 2048]}
         shadow-camera-near={1}
-        shadow-camera-far={40}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
+        shadow-camera-far={120}
+        shadow-camera-left={-30}
+        shadow-camera-right={30}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+        shadow-radius={2}
       />
 
-      {/* Rim lights */}
-      <rectAreaLight
-        width={5}
-        height={1.5}
-        intensity={2.5}
-        color="#c9a227"
-        position={[-6, 3.0, -2.2]}
-        rotation={[0, Math.PI / 4, 0]}
-      />
-      <rectAreaLight
-        width={5}
-        height={1.5}
-        intensity={2.5}
-        color="#c9a227"
-        position={[6, 3.0, -2.2]}
-        rotation={[0, -Math.PI / 4, 0]}
-      />
-
-      {/* Floor */}
+      {/* Floor - Polished Stone */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial color="#cfd4db" metalness={0.05} roughness={0.92} />
+        <planeGeometry args={[200, 160]} />
+        <meshStandardMaterial color="#C8CDD4" metalness={0.0} roughness={0.28} />
       </mesh>
       
       {/* Logo on floor */}
@@ -322,15 +305,13 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
         />
       </mesh>
 
-      {/* Ceiling */}
+      {/* Ceiling - Concrete */}
       <mesh position={[0, 6.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial
-          color="#061226"
-          metalness={0.2}
-          roughness={0.85}
-          emissive="#c9a227"
-          emissiveIntensity={0.02}
+          color="#B8BEC5"
+          metalness={0.0}
+          roughness={0.45}
         />
       </mesh>
 
@@ -340,20 +321,20 @@ export function MuseumScene({ onDoorClick, onResetCamera }: MuseumSceneProps) {
         <meshStandardMaterial map={backdropTexture} roughness={1.0} metalness={0.0} />
       </mesh>
 
-      {/* Side walls */}
+      {/* Side walls - Concrete */}
       <mesh position={[-12, 4, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 8]} />
-        <meshStandardMaterial color="#e5e9ef" roughness={0.95} metalness={0.02} />
+        <meshStandardMaterial color="#B8BEC5" roughness={0.45} metalness={0.0} />
       </mesh>
       <mesh position={[12, 4, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 8]} />
-        <meshStandardMaterial color="#e5e9ef" roughness={0.95} metalness={0.02} />
+        <meshStandardMaterial color="#B8BEC5" roughness={0.45} metalness={0.0} />
       </mesh>
 
-      {/* Back receiver wall */}
+      {/* Back receiver wall - Concrete */}
       <mesh position={[0, 4, -9.2]} receiveShadow>
         <planeGeometry args={[40, 8]} />
-        <meshStandardMaterial color="#e3e8ee" roughness={0.97} />
+        <meshStandardMaterial color="#B8BEC5" roughness={0.45} metalness={0.0} />
       </mesh>
 
       {/* Shadow plane */}
