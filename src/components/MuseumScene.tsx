@@ -361,9 +361,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   // Configure marble texture for seamless tiling and quality
   useEffect(() => {
     marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
-    marbleTexture.repeat.set(6, 6); // Tile for better detail
+    marbleTexture.repeat.set(3, 3); // Better tiling for columns and walls
     marbleTexture.anisotropy = 16; // Maximum quality
     marbleTexture.colorSpace = THREE.SRGBColorSpace;
+    marbleTexture.needsUpdate = true;
   }, [marbleTexture]);
   
   // Store initial camera position
