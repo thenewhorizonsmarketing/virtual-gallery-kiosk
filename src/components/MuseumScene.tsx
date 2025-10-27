@@ -95,8 +95,8 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
       </mesh>
 
       {/* Floating title in center of entryway - large and prominent */}
-      <mesh position={[0, 2.5, 0.2]}>
-        <planeGeometry args={[2.4, 3.2]} />
+      <mesh position={[0, 2.5, 0.3]}>
+        <planeGeometry args={[2.2, 3.0]} />
         <meshBasicMaterial transparent>
           <primitive attach="map" object={createLabelTexture(doorData.key)} />
         </meshBasicMaterial>
@@ -162,49 +162,38 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
 function createLabelTexture(text: string): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = 1024;
-  canvas.height = 1280;
+  canvas.width = 2048;
+  canvas.height = 2048;
 
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'rgba(0,0,0,0)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
   // Elegant glowing serif text - large and prominent
   ctx.fillStyle = '#FFFFFF';
-  ctx.shadowColor = 'rgba(255, 232, 184, 0.9)';
-  ctx.shadowBlur = 25;
+  ctx.shadowColor = 'rgba(255, 232, 184, 0.95)';
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
   
-  // Handle text wrapping for long titles
-  const maxWidth = canvas.width - 80;
-  let fontSize = 140;
+  // Handle text wrapping for long titles with proper margins
+  const margin = 180;
+  const maxWidth = canvas.width - (margin * 2);
+  let fontSize = 160;
   ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
   
   const words = text.split(' ');
-  const lines: string[] = [];
+  let lines: string[] = [];
   let currentLine = '';
   
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    const metrics = ctx.measureText(testLine);
-    
-    if (metrics.width > maxWidth && currentLine) {
-      lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = testLine;
-    }
-  }
-  if (currentLine) lines.push(currentLine);
-  
-  // Adjust font size if too many lines to fit nicely
-  while (lines.length > 4 && fontSize > 80) {
-    fontSize -= 10;
-    ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
-    lines.length = 0;
+  // Function to calculate lines with current font size
+  const calculateLines = () => {
+    lines = [];
     currentLine = '';
-    
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       const metrics = ctx.measureText(testLine);
@@ -217,21 +206,40 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
       }
     }
     if (currentLine) lines.push(currentLine);
+  };
+  
+  calculateLines();
+  
+  // Adjust font size to fit properly - ensure text doesn't overflow
+  const maxLines = 5;
+  const lineHeightFactor = 1.3;
+  
+  while ((lines.length > maxLines || (lines.length * fontSize * lineHeightFactor) > (canvas.height - margin * 2)) && fontSize > 80) {
+    fontSize -= 8;
+    ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
+    calculateLines();
   }
   
-  const lineHeight = fontSize * 1.3;
-  const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+  // Final calculation with optimized size
+  const lineHeight = fontSize * lineHeightFactor;
+  const totalTextHeight = lines.length * lineHeight;
+  const startY = canvas.height / 2 - (totalTextHeight / 2) + (lineHeight / 2);
   
-  // Reset shadow for actual drawing
-  ctx.shadowColor = 'rgba(255, 232, 184, 0.9)';
-  ctx.shadowBlur = 25;
+  // Draw text with glow effect
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(255, 232, 184, 0.95)';
+  ctx.shadowBlur = 30;
   
   lines.forEach((line, i) => {
-    ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+    const y = startY + (i * lineHeight);
+    ctx.fillText(line, canvas.width / 2, y);
   });
 
   const texture = new THREE.CanvasTexture(canvas);
-  texture.anisotropy = 8;
+  texture.anisotropy = 16;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
   return texture;
 }
 
