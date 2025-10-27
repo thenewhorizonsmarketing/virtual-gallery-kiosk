@@ -94,9 +94,9 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
         <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
-      {/* Label above entryway */}
-      <mesh position={[0, 4.7, 0.1]}>
-        <planeGeometry args={[2.8, 0.5]} />
+      {/* Floating title in center of entryway */}
+      <mesh position={[0, 2.8, 0.2]}>
+        <planeGeometry args={[2.6, 0.8]} />
         <meshBasicMaterial transparent>
           <primitive attach="map" object={createLabelTexture(doorData.key)} />
         </meshBasicMaterial>
@@ -116,22 +116,42 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
         />
       </mesh>
 
-      {/* Warm inviting glow from entryway */}
+      {/* Warm inviting glow from entryway - always visible */}
       <pointLight 
         position={[0, 2.5, -1]} 
-        intensity={hovered ? 3.5 : 2.5} 
+        intensity={hovered ? 4.5 : 3.2} 
         color="#FFE8B8" 
-        distance={6} 
+        distance={7} 
         decay={2}
       />
       
-      {/* Soft ambient glow effect */}
+      {/* Secondary warm light for depth */}
+      <pointLight 
+        position={[0, 3.5, -0.5]} 
+        intensity={hovered ? 2.5 : 1.8} 
+        color="#FFF5E1" 
+        distance={5} 
+        decay={2}
+      />
+      
+      {/* Soft ambient glow effect - always visible */}
       <mesh position={[0, 2.5, -0.1]}>
-        <planeGeometry args={[2.6, 4.2]} />
+        <planeGeometry args={[2.8, 4.4]} />
         <meshBasicMaterial
           color={doorData.color}
           transparent
-          opacity={hovered ? 0.15 : 0.08}
+          opacity={hovered ? 0.25 : 0.15}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+      
+      {/* Additional glow layer for richness */}
+      <mesh position={[0, 2.5, -0.2]}>
+        <planeGeometry args={[2.4, 4.0]} />
+        <meshBasicMaterial
+          color="#FFF8DC"
+          transparent
+          opacity={hovered ? 0.2 : 0.12}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -143,23 +163,23 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
   canvas.width = 1024;
-  canvas.height = 256;
+  canvas.height = 512;
 
   ctx.fillStyle = 'rgba(0,0,0,0)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Elegant engraved text style
-  ctx.fillStyle = '#F5F3EF';
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetY = 2;
+  // Elegant glowing serif text
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(255, 232, 184, 0.8)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 0;
   
   // Handle text wrapping for long titles
-  const maxWidth = canvas.width - 80;
-  let fontSize = 72;
-  ctx.font = `700 ${fontSize}px Cinzel, Georgia, serif`;
+  const maxWidth = canvas.width - 100;
+  let fontSize = 80;
+  ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
   
   const words = text.split(' ');
   const lines: string[] = [];
@@ -179,9 +199,9 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   if (currentLine) lines.push(currentLine);
   
   // Adjust font size if too many lines
-  while (lines.length > 2 && fontSize > 48) {
+  while (lines.length > 2 && fontSize > 52) {
     fontSize -= 6;
-    ctx.font = `700 ${fontSize}px Cinzel, Georgia, serif`;
+    ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
     lines.length = 0;
     currentLine = '';
     
