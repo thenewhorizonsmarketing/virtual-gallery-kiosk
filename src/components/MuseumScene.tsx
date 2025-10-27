@@ -265,90 +265,6 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   return texture;
 }
 
-function RotatingArtifact({ position, graniteTexture }: { 
-  position: [number, number, number];
-  graniteTexture: THREE.Texture;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.4;
-      meshRef.current.rotation.x += delta * 0.05;
-    }
-  });
-
-  return (
-    <group position={position}>
-      {/* Plinth */}
-      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.1, 0.8, 1.1]} />
-        <meshStandardMaterial 
-          map={graniteTexture} 
-          roughness={0.15} 
-          metalness={0.1} 
-        />
-      </mesh>
-
-      {/* Glass vitrine */}
-      <mesh position={[0, 1.35, 0]}>
-        <boxGeometry args={[1.05, 1.1, 1.05]} />
-        <meshPhysicalMaterial
-          color={0xffffff}
-          roughness={0.05}
-          transmission={0.92}
-          thickness={0.06}
-          transparent
-        />
-      </mesh>
-
-      {/* Stand */}
-      <mesh position={[0, 1.0, 0]}>
-        <cylinderGeometry args={[0.08, 0.08, 0.25, 24]} />
-        <meshStandardMaterial color="#95A0AD" roughness={0.4} metalness={0.0} />
-      </mesh>
-
-      {/* Artifact */}
-      <mesh ref={meshRef} position={[0, 1.25, 0]} castShadow>
-        <torusKnotGeometry args={[0.22, 0.07, 120, 16]} />
-        <meshStandardMaterial
-          color="#c9a227"
-          metalness={0.6}
-          roughness={0.35}
-          envMapIntensity={1.2}
-        />
-      </mesh>
-
-      {/* Plaque */}
-      <mesh position={[0, 0.85, 0.62]}>
-        <boxGeometry args={[0.7, 0.12, 0.02]} />
-        <meshStandardMaterial color="#4A5562" roughness={0.6} metalness={0.0} />
-      </mesh>
-    </group>
-  );
-}
-
-function Bench({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      {/* Seat */}
-      <mesh position={[0, 0.48, 0]}>
-        <boxGeometry args={[2.8, 0.18, 0.5]} />
-        <meshStandardMaterial color="#5A4A3A" roughness={0.6} />
-      </mesh>
-      {/* Legs */}
-      <mesh position={[-1.1, 0.25, 0]}>
-        <boxGeometry args={[0.12, 0.5, 0.4]} />
-        <meshStandardMaterial color="#3A3A3A" roughness={0.7} />
-      </mesh>
-      <mesh position={[1.1, 0.25, 0]}>
-        <boxGeometry args={[0.12, 0.5, 0.4]} />
-        <meshStandardMaterial color="#3A3A3A" roughness={0.7} />
-      </mesh>
-    </group>
-  );
-}
-
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   // Load all textures
   const backdropTexture = useTexture(backdropImage);
@@ -550,14 +466,6 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       {DOORS.map((door) => (
         <Door key={door.key} doorData={door} onDoorClick={onDoorClick} marbleTexture={marbleTexture} />
       ))}
-
-      {/* Vitrines */}
-      <RotatingArtifact position={[-4.2, 0, -3.0]} graniteTexture={marbleTexture} />
-      <RotatingArtifact position={[4.2, 0, -3.0]} graniteTexture={marbleTexture} />
-
-      {/* Benches */}
-      <Bench position={[-5.8, 0, -1.6]} />
-      <Bench position={[5.8, 0, -1.6]} />
 
       {/* Dust particles */}
       <points ref={particlesRef}>
