@@ -424,6 +424,3 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     </>
   );
 }
-
-// Add missing imports
-import { useState, useEffect } from 'react';
