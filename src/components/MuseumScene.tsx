@@ -233,50 +233,55 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   return (
     <>
-      {/* Soft ambient base lighting */}
-      <ambientLight intensity={0.3} color="#F0E8DC" />
+      {/* Ambient base lighting - brighter to fill room */}
+      <ambientLight intensity={0.8} color="#F5E8DC" />
       
-      {/* Warm diffused skylight - positioned at skylight opening */}
+      {/* Strong warm diffused skylight - positioned at skylight opening */}
       <group position={[0, 6.5, 0]}>
-        {/* Main soft directional through skylight */}
+        {/* Main directional through skylight - stronger */}
         <directionalLight
-          position={[0, 2, 0]}
-          intensity={2.2}
+          position={[0, 3, 0]}
+          intensity={3.5}
           color="#FFE8C8"
           castShadow
           shadow-mapSize={[2048, 2048]}
           shadow-camera-near={0.5}
           shadow-camera-far={10}
-          shadow-camera-left={-4.5}
-          shadow-camera-right={4.5}
-          shadow-camera-top={3.5}
-          shadow-camera-bottom={-3.5}
+          shadow-camera-left={-12}
+          shadow-camera-right={12}
+          shadow-camera-top={12}
+          shadow-camera-bottom={-12}
           shadow-bias={-0.0003}
-          shadow-radius={4}
+          shadow-radius={3}
         />
         
-        {/* Multiple soft point lights for diffusion - positioned in skylight grid */}
-        <pointLight position={[-2, 0.5, -1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
-        <pointLight position={[2, 0.5, -1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
-        <pointLight position={[-2, 0.5, 1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
-        <pointLight position={[2, 0.5, 1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
-        <pointLight position={[0, 0.5, 0]} intensity={2.0} color="#FFECD0" distance={14} decay={1.5} />
+        {/* Multiple strong point lights for room-filling diffusion */}
+        <pointLight position={[-3, 0.5, -2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
+        <pointLight position={[3, 0.5, -2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
+        <pointLight position={[-3, 0.5, 2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
+        <pointLight position={[3, 0.5, 2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
+        <pointLight position={[0, 0.5, 0]} intensity={3.5} color="#FFECD0" distance={20} decay={1.2} />
       </group>
       
-      {/* Gentle fill light */}
+      {/* Directional fill from skylight angle */}
       <directionalLight
-        position={[6, 4, 4]}
-        intensity={0.4}
-        color="#F5E8D8"
+        position={[4, 8, 3]}
+        intensity={1.2}
+        color="#FFF5E8"
+      />
+      <directionalLight
+        position={[-4, 8, -3]}
+        intensity={1.2}
+        color="#FFF5E8"
       />
       
       {/* Warm reflected light from wood surfaces */}
       <pointLight 
         position={[0, 1.5, 0]} 
-        intensity={0.6} 
+        intensity={1.2} 
         color="#D4B896" 
-        distance={10} 
-        decay={2}
+        distance={15} 
+        decay={1.5}
       />
 
       {/* Herringbone parquet floor */}
