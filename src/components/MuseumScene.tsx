@@ -4,10 +4,7 @@ import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import backdropImage from '@/assets/museum-backdrop.jpg';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
-import carraraMarble from '@/assets/textures/marble/carrara-marble.jpg';
-import floorMarble from '@/assets/textures/marble/floor-marble.jpg';
-import wallTravertine from '@/assets/textures/marble/wall-travertine.jpg';
-import darkGranite from '@/assets/textures/marble/dark-granite.jpg';
+import marblePattern from '@/assets/textures/marble/marble-pattern.svg';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -356,29 +353,18 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   // Load all textures
   const backdropTexture = useTexture(backdropImage);
   const logoTexture = useTexture(schoolLogo);
-  const carraraTexture = useTexture(carraraMarble);
-  const floorTexture = useTexture(floorMarble);
-  const wallTexture = useTexture(wallTravertine);
-  const graniteTexture = useTexture(darkGranite);
+  const marbleTexture = useTexture(marblePattern);
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
   
-  // Configure marble textures for seamless tiling and quality
+  // Configure marble texture for seamless tiling and quality
   useEffect(() => {
-    [carraraTexture, floorTexture, wallTexture, graniteTexture].forEach(texture => {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(4, 4); // Tile for better detail
-      texture.anisotropy = 16; // Maximum quality
-      texture.colorSpace = THREE.SRGBColorSpace;
-    });
-    
-    // Floor needs different repeat for larger tiles
-    floorTexture.repeat.set(8, 8);
-    
-    // Walls need different repeat
-    wallTexture.repeat.set(6, 3);
-  }, [carraraTexture, floorTexture, wallTexture, graniteTexture]);
+    marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
+    marbleTexture.repeat.set(6, 6); // Tile for better detail
+    marbleTexture.anisotropy = 16; // Maximum quality
+    marbleTexture.colorSpace = THREE.SRGBColorSpace;
+  }, [marbleTexture]);
   
   // Store initial camera position
   const initialCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
@@ -485,7 +471,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[200, 160]} />
         <meshStandardMaterial 
-          map={floorTexture}
+          map={marbleTexture}
           metalness={0.08} 
           roughness={0.15}
           envMapIntensity={0.5}
@@ -508,7 +494,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh position={[0, 7.0, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial
-          map={wallTexture}
+          map={marbleTexture}
           metalness={0.0}
           roughness={0.6}
         />
@@ -524,7 +510,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh position={[-12, 4, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
         <meshStandardMaterial 
-          map={wallTexture} 
+          map={marbleTexture} 
           roughness={0.7} 
           metalness={0.0} 
         />
@@ -532,7 +518,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh position={[12, 4, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
         <meshStandardMaterial 
-          map={wallTexture} 
+          map={marbleTexture} 
           roughness={0.7} 
           metalness={0.0} 
         />
@@ -542,7 +528,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh position={[0, 4, -9.2]} receiveShadow>
         <planeGeometry args={[40, 10]} />
         <meshStandardMaterial 
-          map={wallTexture} 
+          map={marbleTexture} 
           roughness={0.65} 
           metalness={0.0} 
         />
@@ -556,12 +542,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
       {/* Doors */}
       {DOORS.map((door) => (
-        <Door key={door.key} doorData={door} onDoorClick={onDoorClick} marbleTexture={carraraTexture} />
+        <Door key={door.key} doorData={door} onDoorClick={onDoorClick} marbleTexture={marbleTexture} />
       ))}
 
       {/* Vitrines */}
-      <RotatingArtifact position={[-4.2, 0, -3.0]} graniteTexture={graniteTexture} />
-      <RotatingArtifact position={[4.2, 0, -3.0]} graniteTexture={graniteTexture} />
+      <RotatingArtifact position={[-4.2, 0, -3.0]} graniteTexture={marbleTexture} />
+      <RotatingArtifact position={[4.2, 0, -3.0]} graniteTexture={marbleTexture} />
 
       {/* Benches */}
       <Bench position={[-5.8, 0, -1.6]} />
