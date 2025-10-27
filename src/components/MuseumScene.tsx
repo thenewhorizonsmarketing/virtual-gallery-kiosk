@@ -36,10 +36,10 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
   return (
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       {/* Left Column with fluting */}
-      <group position={[-1.4, 2.5, 0]}>
+      <group position={[-1.05, 1.8, 0]}>
         {/* Column shaft with flutes */}
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.18, 0.20, 4.2, 24]} />
+          <cylinderGeometry args={[0.14, 0.16, 3.0, 24]} />
           <meshStandardMaterial 
             map={marbleTexture}
             roughness={0.25}
@@ -47,56 +47,56 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
           />
         </mesh>
         {/* Column base */}
-        <mesh position={[0, -2.3, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.24, 0.28, 0.35, 24]} />
+        <mesh position={[0, -1.65, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.18, 0.22, 0.25, 24]} />
           <meshStandardMaterial map={marbleTexture} roughness={0.3} metalness={0.05} />
         </mesh>
         {/* Column capital */}
-        <mesh position={[0, 2.3, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.28, 0.20, 0.4, 24]} />
+        <mesh position={[0, 1.65, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.22, 0.16, 0.3, 24]} />
           <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
         </mesh>
       </group>
 
       {/* Right Column with fluting */}
-      <group position={[1.4, 2.5, 0]}>
+      <group position={[1.05, 1.8, 0]}>
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[0.18, 0.20, 4.2, 24]} />
+          <cylinderGeometry args={[0.14, 0.16, 3.0, 24]} />
           <meshStandardMaterial 
             map={marbleTexture}
             roughness={0.25}
             metalness={0.05}
           />
         </mesh>
-        <mesh position={[0, -2.3, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.24, 0.28, 0.35, 24]} />
+        <mesh position={[0, -1.65, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.18, 0.22, 0.25, 24]} />
           <meshStandardMaterial map={marbleTexture} roughness={0.3} metalness={0.05} />
         </mesh>
-        <mesh position={[0, 2.3, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.28, 0.20, 0.4, 24]} />
+        <mesh position={[0, 1.65, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.22, 0.16, 0.3, 24]} />
           <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
         </mesh>
       </group>
 
       {/* Entablature (top architectural element) */}
-      <mesh position={[0, 4.9, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3.2, 0.25, 0.35]} />
+      <mesh position={[0, 3.55, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.4, 0.18, 0.28]} />
         <meshStandardMaterial map={marbleTexture} roughness={0.2} metalness={0.05} />
       </mesh>
-      <mesh position={[0, 5.15, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3.4, 0.22, 0.4]} />
+      <mesh position={[0, 3.73, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.55, 0.16, 0.32]} />
         <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
       {/* Door frame surround */}
-      <mesh position={[0, 2.5, -0.08]} castShadow receiveShadow>
-        <boxGeometry args={[2.9, 4.3, 0.12]} />
+      <mesh position={[0, 1.8, -0.06]} castShadow receiveShadow>
+        <boxGeometry args={[2.2, 3.1, 0.09]} />
         <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
       {/* Floating title in center of entryway - large and prominent */}
-      <mesh position={[0, 2.5, 0.3]}>
-        <planeGeometry args={[2.2, 3.0]} />
+      <mesh position={[0, 1.8, 0.25]}>
+        <planeGeometry args={[1.7, 2.3]} />
         <meshBasicMaterial transparent>
           <primitive attach="map" object={createLabelTexture(doorData.key)} />
         </meshBasicMaterial>
@@ -104,12 +104,12 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
 
       {/* Inviting entrance portal - clickable area */}
       <mesh
-        position={[0, 2.5, 0]}
+        position={[0, 1.8, 0]}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={() => onDoorClick(doorData.key)}
       >
-        <planeGeometry args={[2.6, 4.2]} />
+        <planeGeometry args={[2.0, 3.0]} />
         <meshBasicMaterial
           transparent
           opacity={0}
@@ -118,25 +118,25 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
 
       {/* Warm inviting glow from entryway - always visible */}
       <pointLight 
-        position={[0, 2.5, -1]} 
+        position={[0, 1.8, -1]} 
         intensity={hovered ? 4.5 : 3.2} 
         color="#FFE8B8" 
-        distance={7} 
+        distance={6} 
         decay={2}
       />
       
       {/* Secondary warm light for depth */}
       <pointLight 
-        position={[0, 3.5, -0.5]} 
+        position={[0, 2.5, -0.5]} 
         intensity={hovered ? 2.5 : 1.8} 
         color="#FFF5E1" 
-        distance={5} 
+        distance={4.5} 
         decay={2}
       />
       
       {/* Soft ambient glow effect - always visible */}
-      <mesh position={[0, 2.5, -0.1]}>
-        <planeGeometry args={[2.8, 4.4]} />
+      <mesh position={[0, 1.8, -0.1]}>
+        <planeGeometry args={[2.1, 3.2]} />
         <meshBasicMaterial
           color={doorData.color}
           transparent
@@ -146,8 +146,8 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
       </mesh>
       
       {/* Additional glow layer for richness */}
-      <mesh position={[0, 2.5, -0.2]}>
-        <planeGeometry args={[2.4, 4.0]} />
+      <mesh position={[0, 1.8, -0.2]}>
+        <planeGeometry args={[1.85, 2.9]} />
         <meshBasicMaterial
           color="#FFF8DC"
           transparent
@@ -335,7 +335,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const backdropWidth = backdropHeight * backdropAspect;
   
   const logoAspect = 577.88 / 199.75;
-  const logoWidth = 12;
+  const logoWidth = 6;
   const logoHeight = logoWidth / logoAspect;
 
   return (
