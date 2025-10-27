@@ -94,9 +94,9 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
         <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
-      {/* Floating title in center of entryway */}
-      <mesh position={[0, 2.8, 0.2]}>
-        <planeGeometry args={[2.6, 0.8]} />
+      {/* Floating title in center of entryway - large and prominent */}
+      <mesh position={[0, 2.5, 0.2]}>
+        <planeGeometry args={[2.4, 3.2]} />
         <meshBasicMaterial transparent>
           <primitive attach="map" object={createLabelTexture(doorData.key)} />
         </meshBasicMaterial>
@@ -163,22 +163,22 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
   canvas.width = 1024;
-  canvas.height = 512;
+  canvas.height = 1280;
 
   ctx.fillStyle = 'rgba(0,0,0,0)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Elegant glowing serif text
+  // Elegant glowing serif text - large and prominent
   ctx.fillStyle = '#FFFFFF';
-  ctx.shadowColor = 'rgba(255, 232, 184, 0.8)';
-  ctx.shadowBlur = 20;
+  ctx.shadowColor = 'rgba(255, 232, 184, 0.9)';
+  ctx.shadowBlur = 25;
   ctx.shadowOffsetY = 0;
   
   // Handle text wrapping for long titles
-  const maxWidth = canvas.width - 100;
-  let fontSize = 80;
+  const maxWidth = canvas.width - 80;
+  let fontSize = 140;
   ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
   
   const words = text.split(' ');
@@ -198,9 +198,9 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   }
   if (currentLine) lines.push(currentLine);
   
-  // Adjust font size if too many lines
-  while (lines.length > 2 && fontSize > 52) {
-    fontSize -= 6;
+  // Adjust font size if too many lines to fit nicely
+  while (lines.length > 4 && fontSize > 80) {
+    fontSize -= 10;
     ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
     lines.length = 0;
     currentLine = '';
@@ -219,8 +219,12 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
     if (currentLine) lines.push(currentLine);
   }
   
-  const lineHeight = fontSize * 1.2;
+  const lineHeight = fontSize * 1.3;
   const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+  
+  // Reset shadow for actual drawing
+  ctx.shadowColor = 'rgba(255, 232, 184, 0.9)';
+  ctx.shadowBlur = 25;
   
   lines.forEach((line, i) => {
     ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
