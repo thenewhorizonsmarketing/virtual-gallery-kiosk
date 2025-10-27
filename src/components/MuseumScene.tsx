@@ -233,53 +233,49 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   return (
     <>
-      {/* Natural skylight lighting */}
-      <ambientLight intensity={0.4} color="#F5EFE7" />
+      {/* Soft ambient base lighting */}
+      <ambientLight intensity={0.3} color="#F0E8DC" />
       
-      {/* Main skylight - strong directional from above */}
+      {/* Warm diffused skylight - positioned at skylight opening */}
+      <group position={[0, 6.5, 0]}>
+        {/* Main soft directional through skylight */}
+        <directionalLight
+          position={[0, 2, 0]}
+          intensity={2.2}
+          color="#FFE8C8"
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-near={0.5}
+          shadow-camera-far={10}
+          shadow-camera-left={-4.5}
+          shadow-camera-right={4.5}
+          shadow-camera-top={3.5}
+          shadow-camera-bottom={-3.5}
+          shadow-bias={-0.0003}
+          shadow-radius={4}
+        />
+        
+        {/* Multiple soft point lights for diffusion - positioned in skylight grid */}
+        <pointLight position={[-2, 0.5, -1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
+        <pointLight position={[2, 0.5, -1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
+        <pointLight position={[-2, 0.5, 1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
+        <pointLight position={[2, 0.5, 1.5]} intensity={1.8} color="#FFF0D6" distance={12} decay={1.5} />
+        <pointLight position={[0, 0.5, 0]} intensity={2.0} color="#FFECD0" distance={14} decay={1.5} />
+      </group>
+      
+      {/* Gentle fill light */}
       <directionalLight
-        position={[0, 15, 0]}
-        intensity={4.5}
-        color="#FFF9E8"
-        castShadow
-        shadow-mapSize={[4096, 4096]}
-        shadow-camera-near={1}
-        shadow-camera-far={25}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
-        shadow-bias={-0.0005}
-        shadow-radius={2}
+        position={[6, 4, 4]}
+        intensity={0.4}
+        color="#F5E8D8"
       />
       
-      {/* Angled skylight rays for realism */}
-      <directionalLight
-        position={[3, 12, -2]}
-        intensity={2.0}
-        color="#FFF5D6"
-        castShadow={false}
-      />
-      <directionalLight
-        position={[-3, 12, 2]}
-        intensity={2.0}
-        color="#FFF5D6"
-        castShadow={false}
-      />
-      
-      {/* Soft ambient fill */}
-      <directionalLight
-        position={[8, 8, 8]}
-        intensity={0.6}
-        color="#FFF8F0"
-      />
-      
-      {/* Warm bounce light from floor */}
+      {/* Warm reflected light from wood surfaces */}
       <pointLight 
-        position={[0, 1, 0]} 
-        intensity={0.8} 
+        position={[0, 1.5, 0]} 
+        intensity={0.6} 
         color="#D4B896" 
-        distance={12} 
+        distance={10} 
         decay={2}
       />
 
@@ -424,14 +420,26 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         />
       </points>
       
-      {/* Light beam effect from skylight */}
-      <mesh position={[0, 3, 0]}>
-        <cylinderGeometry args={[3.5, 4, 6, 32, 1, true]} />
+      {/* Soft volumetric light beam from skylight - aligned with skylight opening */}
+      <mesh position={[0, 3.5, 0]}>
+        <boxGeometry args={[7.5, 6, 5.5]} />
         <meshBasicMaterial
-          color="#FFF9E8"
+          color="#FFE8C0"
           transparent
-          opacity={0.08}
+          opacity={0.04}
           side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      
+      {/* Diffused glow at skylight panel */}
+      <mesh position={[0, 5.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[8, 6]} />
+        <meshBasicMaterial
+          color="#FFECD6"
+          transparent
+          opacity={0.15}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
