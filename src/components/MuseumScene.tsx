@@ -14,10 +14,10 @@ interface MuseumSceneProps {
 }
 
 const DOORS = [
-  { key: 'Alumni/Class Composites', x: -6.5, color: '#c9a227' },
-  { key: 'Publications (Amicus, Legal Eye, Law Review, Directory)', x: -2.2, color: '#c9a227' },
-  { key: 'Historical Photos/Archives', x: 2.2, color: '#c9a227' },
-  { key: 'Faculty & Staff', x: 6.5, color: '#c9a227' },
+  { key: 'Alumni/Class Composites', angle: -60, radius: 9, color: '#c9a227' },
+  { key: 'Publications (Amicus, Legal Eye, Law Review, Directory)', angle: -20, radius: 9, color: '#c9a227' },
+  { key: 'Historical Photos/Archives', angle: 20, radius: 9, color: '#c9a227' },
+  { key: 'Faculty & Staff', angle: 60, radius: 9, color: '#c9a227' },
 ];
 
 function Door({ doorData, onDoorClick, marbleTexture }: { 
@@ -25,23 +25,16 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
   onDoorClick: (key: string) => void;
   marbleTexture: THREE.Texture;
 }) {
-  const leftDoorRef = useRef<THREE.Mesh>(null);
-  const rightDoorRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-
-  useFrame(() => {
-    if (leftDoorRef.current && rightDoorRef.current) {
-      const mat = leftDoorRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = THREE.MathUtils.lerp(
-        mat.emissiveIntensity,
-        hovered ? 0.35 : 0.12,
-        0.1
-      );
-    }
-  });
+  
+  // Calculate position on semi-circle
+  const angleRad = (doorData.angle * Math.PI) / 180;
+  const x = doorData.radius * Math.sin(angleRad);
+  const z = -doorData.radius * Math.cos(angleRad);
+  const rotation = -angleRad; // Rotate to face center
 
   return (
-    <group position={[doorData.x, 0, -8]}>
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       {/* Left Column with fluting */}
       <group position={[-1.4, 2.5, 0]}>
         {/* Column shaft with flutes */}
@@ -101,7 +94,7 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
         <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
-      {/* Label above door */}
+      {/* Label above entryway */}
       <mesh position={[0, 4.7, 0.1]}>
         <planeGeometry args={[2.8, 0.5]} />
         <meshBasicMaterial transparent>
@@ -109,83 +102,36 @@ function Door({ doorData, onDoorClick, marbleTexture }: {
         </meshBasicMaterial>
       </mesh>
 
-      {/* Left Door Panel */}
+      {/* Inviting entrance portal - clickable area */}
       <mesh
-        ref={leftDoorRef}
-        position={[-0.63, 2.5, 0]}
+        position={[0, 2.5, 0]}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={() => onDoorClick(doorData.key)}
-        castShadow
-        receiveShadow
       >
-        <boxGeometry args={[1.15, 4.0, 0.12]} />
-        <meshStandardMaterial
-          color="#B89968"
-          metalness={0.65}
-          roughness={0.25}
-          emissive="#C9A972"
-          emissiveIntensity={0.12}
+        <planeGeometry args={[2.6, 4.2]} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
         />
       </mesh>
 
-      {/* Left door panels (decorative) */}
-      <mesh position={[-0.63, 3.2, 0.07]} castShadow>
-        <boxGeometry args={[0.85, 1.3, 0.04]} />
-        <meshStandardMaterial color="#A88858" metalness={0.5} roughness={0.3} />
-      </mesh>
-      <mesh position={[-0.63, 1.6, 0.07]} castShadow>
-        <boxGeometry args={[0.85, 1.3, 0.04]} />
-        <meshStandardMaterial color="#A88858" metalness={0.5} roughness={0.3} />
-      </mesh>
-
-      {/* Right Door Panel */}
-      <mesh
-        ref={rightDoorRef}
-        position={[0.63, 2.5, 0]}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={() => onDoorClick(doorData.key)}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[1.15, 4.0, 0.12]} />
-        <meshStandardMaterial
-          color="#B89968"
-          metalness={0.65}
-          roughness={0.25}
-          emissive="#C9A972"
-          emissiveIntensity={0.12}
-        />
-      </mesh>
-
-      {/* Right door panels (decorative) */}
-      <mesh position={[0.63, 3.2, 0.07]} castShadow>
-        <boxGeometry args={[0.85, 1.3, 0.04]} />
-        <meshStandardMaterial color="#A88858" metalness={0.5} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.63, 1.6, 0.07]} castShadow>
-        <boxGeometry args={[0.85, 1.3, 0.04]} />
-        <meshStandardMaterial color="#A88858" metalness={0.5} roughness={0.3} />
-      </mesh>
-
-      {/* Door handles */}
-      <mesh position={[-0.3, 2.5, 0.12]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.03, 0.03, 0.15, 16]} />
-        <meshStandardMaterial color="#8B7355" metalness={0.8} roughness={0.2} />
-      </mesh>
-      <mesh position={[0.3, 2.5, 0.12]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.03, 0.03, 0.15, 16]} />
-        <meshStandardMaterial color="#8B7355" metalness={0.8} roughness={0.2} />
-      </mesh>
-
-      {/* Subtle glow effect */}
-      <mesh position={[0, 2.5, 0.14]} renderOrder={-1}>
+      {/* Warm inviting glow from entryway */}
+      <pointLight 
+        position={[0, 2.5, -1]} 
+        intensity={hovered ? 3.5 : 2.5} 
+        color="#FFE8B8" 
+        distance={6} 
+        decay={2}
+      />
+      
+      {/* Soft ambient glow effect */}
+      <mesh position={[0, 2.5, -0.1]}>
         <planeGeometry args={[2.6, 4.2]} />
         <meshBasicMaterial
           color={doorData.color}
           transparent
-          opacity={0.05}
+          opacity={hovered ? 0.15 : 0.08}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -331,7 +277,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       // Find the door and zoom into it
       const door = DOORS.find(d => d.key === selectedRoom);
       if (door) {
-        targetCameraPos.current.set(door.x, 1.8, -4.5); // Zoom close to door
+        const angleRad = (door.angle * Math.PI) / 180;
+        const x = door.radius * Math.sin(angleRad);
+        const z = -door.radius * Math.cos(angleRad) + 3.5; // Zoom close to entryway
+        targetCameraPos.current.set(x, 1.8, z);
         isAnimating.current = true;
         hasNotifiedComplete.current = false;
       }
