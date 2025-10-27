@@ -183,7 +183,7 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   // Handle text wrapping for long titles with proper margins
   const margin = 180;
   const maxWidth = canvas.width - (margin * 2);
-  let fontSize = 160;
+  let fontSize = 240;
   ctx.font = `700 ${fontSize}px Georgia, "Times New Roman", serif`;
   
   const words = text.split(' ');
