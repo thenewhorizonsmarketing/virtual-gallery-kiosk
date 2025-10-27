@@ -6,6 +6,7 @@ import backdropImage from '@/assets/museum-scene.svg';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
 import marblePattern from '@/assets/textures/marble/marble-pattern.svg';
 import museumWall from '@/assets/museum-wall.png';
+import backWallImage from '@/assets/museum-back-wall.png';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -250,6 +251,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const logoTexture = useTexture(schoolLogo);
   const marbleTexture = useTexture(marblePattern);
   const wallTexture = useTexture(museumWall);
+  const backWallTexture = useTexture(backWallImage);
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
@@ -268,7 +270,13 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     wallTexture.anisotropy = 16;
     wallTexture.colorSpace = THREE.SRGBColorSpace;
     wallTexture.needsUpdate = true;
-  }, [marbleTexture, wallTexture]);
+    
+    // Configure back wall texture
+    backWallTexture.wrapS = backWallTexture.wrapT = THREE.ClampToEdgeWrapping;
+    backWallTexture.anisotropy = 16;
+    backWallTexture.colorSpace = THREE.SRGBColorSpace;
+    backWallTexture.needsUpdate = true;
+  }, [marbleTexture, wallTexture, backWallTexture]);
   
   // Store initial camera position
   const initialCameraPos = useRef(new THREE.Vector3(0, 1.8, 8.5));
@@ -436,12 +444,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         />
       </mesh>
 
-      {/* Back receiver wall - Warm limestone */}
+      {/* Back receiver wall - Museum interior */}
       <mesh position={[0, 4, -9.2]} receiveShadow>
         <planeGeometry args={[40, 10]} />
         <meshStandardMaterial 
-          map={marbleTexture} 
-          roughness={0.65} 
+          map={backWallTexture} 
+          roughness={0.7} 
           metalness={0.0} 
         />
       </mesh>
