@@ -4,6 +4,10 @@ import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import backdropImage from '@/assets/museum-backdrop.jpg';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
+import carraraMarble from '@/assets/textures/marble/carrara-marble.jpg';
+import floorMarble from '@/assets/textures/marble/floor-marble.jpg';
+import wallTravertine from '@/assets/textures/marble/wall-travertine.jpg';
+import darkGranite from '@/assets/textures/marble/dark-granite.jpg';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -19,7 +23,11 @@ const DOORS = [
   { key: 'Faculty & Staff', x: 6.5, color: '#c9a227' },
 ];
 
-function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClick: (key: string) => void }) {
+function Door({ doorData, onDoorClick, marbleTexture }: { 
+  doorData: typeof DOORS[0]; 
+  onDoorClick: (key: string) => void;
+  marbleTexture: THREE.Texture;
+}) {
   const leftDoorRef = useRef<THREE.Mesh>(null);
   const rightDoorRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -43,20 +51,20 @@ function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClic
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.18, 0.20, 4.2, 24]} />
           <meshStandardMaterial 
-            color="#E8E4DC" 
-            roughness={0.35}
+            map={marbleTexture}
+            roughness={0.25}
             metalness={0.05}
           />
         </mesh>
         {/* Column base */}
         <mesh position={[0, -2.3, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.24, 0.28, 0.35, 24]} />
-          <meshStandardMaterial color="#D8D4CC" roughness={0.4} metalness={0.05} />
+          <meshStandardMaterial map={marbleTexture} roughness={0.3} metalness={0.05} />
         </mesh>
         {/* Column capital */}
         <mesh position={[0, 2.3, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.28, 0.20, 0.4, 24]} />
-          <meshStandardMaterial color="#E0DCD4" roughness={0.35} metalness={0.05} />
+          <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
         </mesh>
       </group>
 
@@ -65,35 +73,35 @@ function Door({ doorData, onDoorClick }: { doorData: typeof DOORS[0]; onDoorClic
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.18, 0.20, 4.2, 24]} />
           <meshStandardMaterial 
-            color="#E8E4DC" 
-            roughness={0.35}
+            map={marbleTexture}
+            roughness={0.25}
             metalness={0.05}
           />
         </mesh>
         <mesh position={[0, -2.3, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.24, 0.28, 0.35, 24]} />
-          <meshStandardMaterial color="#D8D4CC" roughness={0.4} metalness={0.05} />
+          <meshStandardMaterial map={marbleTexture} roughness={0.3} metalness={0.05} />
         </mesh>
         <mesh position={[0, 2.3, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.28, 0.20, 0.4, 24]} />
-          <meshStandardMaterial color="#E0DCD4" roughness={0.35} metalness={0.05} />
+          <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
         </mesh>
       </group>
 
       {/* Entablature (top architectural element) */}
       <mesh position={[0, 4.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.2, 0.25, 0.35]} />
-        <meshStandardMaterial color="#E8E4DC" roughness={0.3} metalness={0.05} />
+        <meshStandardMaterial map={marbleTexture} roughness={0.2} metalness={0.05} />
       </mesh>
       <mesh position={[0, 5.15, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.4, 0.22, 0.4]} />
-        <meshStandardMaterial color="#D8D4CC" roughness={0.35} metalness={0.05} />
+        <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
       {/* Door frame surround */}
       <mesh position={[0, 2.5, -0.08]} castShadow receiveShadow>
         <boxGeometry args={[2.9, 4.3, 0.12]} />
-        <meshStandardMaterial color="#DCD8D0" roughness={0.35} metalness={0.05} />
+        <meshStandardMaterial map={marbleTexture} roughness={0.25} metalness={0.05} />
       </mesh>
 
       {/* Label above door */}
@@ -260,7 +268,10 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   return texture;
 }
 
-function RotatingArtifact({ position }: { position: [number, number, number] }) {
+function RotatingArtifact({ position, graniteTexture }: { 
+  position: [number, number, number];
+  graniteTexture: THREE.Texture;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state, delta) => {
@@ -275,7 +286,11 @@ function RotatingArtifact({ position }: { position: [number, number, number] }) 
       {/* Plinth */}
       <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.1, 0.8, 1.1]} />
-        <meshStandardMaterial color="#D4D8DD" roughness={0.5} metalness={0.0} />
+        <meshStandardMaterial 
+          map={graniteTexture} 
+          roughness={0.15} 
+          metalness={0.1} 
+        />
       </mesh>
 
       {/* Glass vitrine */}
@@ -338,10 +353,32 @@ function Bench({ position }: { position: [number, number, number] }) {
 }
 
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
+  // Load all textures
   const backdropTexture = useTexture(backdropImage);
   const logoTexture = useTexture(schoolLogo);
+  const carraraTexture = useTexture(carraraMarble);
+  const floorTexture = useTexture(floorMarble);
+  const wallTexture = useTexture(wallTravertine);
+  const graniteTexture = useTexture(darkGranite);
+  
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
+  
+  // Configure marble textures for seamless tiling and quality
+  useEffect(() => {
+    [carraraTexture, floorTexture, wallTexture, graniteTexture].forEach(texture => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(4, 4); // Tile for better detail
+      texture.anisotropy = 16; // Maximum quality
+      texture.colorSpace = THREE.SRGBColorSpace;
+    });
+    
+    // Floor needs different repeat for larger tiles
+    floorTexture.repeat.set(8, 8);
+    
+    // Walls need different repeat
+    wallTexture.repeat.set(6, 3);
+  }, [carraraTexture, floorTexture, wallTexture, graniteTexture]);
   
   // Store initial camera position
   const initialCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
@@ -448,10 +485,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[200, 160]} />
         <meshStandardMaterial 
-          color="#D8D4CC" 
+          map={floorTexture}
           metalness={0.08} 
           roughness={0.15}
-          envMapIntensity={0.4}
+          envMapIntensity={0.5}
         />
       </mesh>
       
@@ -471,9 +508,9 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <mesh position={[0, 7.0, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial
-          color="#E8E4DC"
+          map={wallTexture}
           metalness={0.0}
-          roughness={0.55}
+          roughness={0.6}
         />
       </mesh>
 
@@ -486,17 +523,29 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       {/* Side walls - Warm limestone */}
       <mesh position={[-12, 4, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
-        <meshStandardMaterial color="#CCC8BE" roughness={0.65} metalness={0.0} />
+        <meshStandardMaterial 
+          map={wallTexture} 
+          roughness={0.7} 
+          metalness={0.0} 
+        />
       </mesh>
       <mesh position={[12, 4, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
-        <meshStandardMaterial color="#CCC8BE" roughness={0.65} metalness={0.0} />
+        <meshStandardMaterial 
+          map={wallTexture} 
+          roughness={0.7} 
+          metalness={0.0} 
+        />
       </mesh>
 
       {/* Back receiver wall - Warm limestone */}
       <mesh position={[0, 4, -9.2]} receiveShadow>
         <planeGeometry args={[40, 10]} />
-        <meshStandardMaterial color="#C8C4BA" roughness={0.6} metalness={0.0} />
+        <meshStandardMaterial 
+          map={wallTexture} 
+          roughness={0.65} 
+          metalness={0.0} 
+        />
       </mesh>
 
       {/* Shadow plane */}
@@ -507,12 +556,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
       {/* Doors */}
       {DOORS.map((door) => (
-        <Door key={door.key} doorData={door} onDoorClick={onDoorClick} />
+        <Door key={door.key} doorData={door} onDoorClick={onDoorClick} marbleTexture={carraraTexture} />
       ))}
 
       {/* Vitrines */}
-      <RotatingArtifact position={[-4.2, 0, -3.0]} />
-      <RotatingArtifact position={[4.2, 0, -3.0]} />
+      <RotatingArtifact position={[-4.2, 0, -3.0]} graniteTexture={graniteTexture} />
+      <RotatingArtifact position={[4.2, 0, -3.0]} graniteTexture={graniteTexture} />
 
       {/* Benches */}
       <Bench position={[-5.8, 0, -1.6]} />
