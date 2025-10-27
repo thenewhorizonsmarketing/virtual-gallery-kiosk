@@ -245,120 +245,6 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
   return texture;
 }
 
-// Helper to create bookshelf
-function Bookshelf({ position, rotation = [0, 0, 0] }: { position: [number, number, number]; rotation?: [number, number, number] }) {
-  const bookColors = ['#8B0000', '#00008B', '#006400', '#8B4513', '#483D8B', '#B8860B', '#2F4F4F'];
-  
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Bookshelf frame */}
-      <mesh>
-        <boxGeometry args={[2.5, 3, 0.4]} />
-        <meshStandardMaterial color="#8B6F47" roughness={0.7} />
-      </mesh>
-      
-      {/* Shelves */}
-      {[0, 1, 2, 3, 4].map((shelf) => (
-        <group key={shelf} position={[0, 1.2 - shelf * 0.6, 0]}>
-          <mesh position={[0, 0, 0.15]}>
-            <boxGeometry args={[2.3, 0.05, 0.3]} />
-            <meshStandardMaterial color="#654321" />
-          </mesh>
-          
-          {/* Books on shelf */}
-          {Array.from({ length: 12 }).map((_, i) => (
-            <mesh key={i} position={[-1.0 + i * 0.19, 0.2, 0.15]}>
-              <boxGeometry args={[0.15, 0.4, 0.25]} />
-              <meshStandardMaterial 
-                color={bookColors[Math.floor(Math.random() * bookColors.length)]} 
-                roughness={0.8}
-              />
-            </mesh>
-          ))}
-        </group>
-      ))}
-    </group>
-  );
-}
-
-// Helper to create chandelier
-function Chandelier({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      {/* Central column */}
-      <mesh>
-        <cylinderGeometry args={[0.08, 0.08, 1.5, 8]} />
-        <meshStandardMaterial color="#C0C0C0" metalness={0.9} roughness={0.1} />
-      </mesh>
-      
-      {/* Crystal arms */}
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const angle = (i * Math.PI * 2) / 6;
-        const x = Math.cos(angle) * 0.6;
-        const z = Math.sin(angle) * 0.6;
-        return (
-          <group key={i} position={[x, -0.5, z]}>
-            <mesh>
-              <sphereGeometry args={[0.15, 16, 16]} />
-              <meshStandardMaterial 
-                color="#FFFFFF" 
-                metalness={0.1} 
-                roughness={0.0}
-                transparent
-                opacity={0.9}
-                emissive="#FFE8B8"
-                emissiveIntensity={0.5}
-              />
-            </mesh>
-            <pointLight color="#FFE8B8" intensity={1.5} distance={8} decay={2} />
-          </group>
-        );
-      })}
-      
-      {/* Main chandelier light */}
-      <pointLight position={[0, -0.8, 0]} color="#FFF5E1" intensity={2.5} distance={12} decay={2} />
-    </group>
-  );
-}
-
-// Helper to create arched window
-function ArchedWindow({ position, rotation = [0, 0, 0] }: { position: [number, number, number]; rotation?: [number, number, number] }) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Window frame */}
-      <mesh>
-        <boxGeometry args={[2.2, 4.5, 0.2]} />
-        <meshStandardMaterial color="#D4C5A9" roughness={0.6} />
-      </mesh>
-      
-      {/* Glass panes */}
-      {[0, 1, 2].map((col) => 
-        [0, 1, 2, 3, 4].map((row) => (
-          <mesh key={`${col}-${row}`} position={[-0.6 + col * 0.6, 1.5 - row * 0.7, 0.11]}>
-            <planeGeometry args={[0.5, 0.6]} />
-            <meshStandardMaterial 
-              color="#E8F4F8" 
-              transparent 
-              opacity={0.3}
-              roughness={0.1}
-              metalness={0.1}
-            />
-          </mesh>
-        ))
-      )}
-      
-      {/* Arch top */}
-      <mesh position={[0, 2.5, 0]}>
-        <cylinderGeometry args={[1.1, 1.1, 0.2, 32, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial color="#D4C5A9" roughness={0.6} />
-      </mesh>
-      
-      {/* Window light */}
-      <pointLight position={[0, 1, 0.5]} color="#FFF8E7" intensity={2} distance={6} />
-    </group>
-  );
-}
-
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   // Load all textures
   const backdropTexture = useTexture(backdropImage);
@@ -373,17 +259,19 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   // Configure marble texture for seamless tiling and quality
   useEffect(() => {
     marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
-    marbleTexture.repeat.set(3, 3);
-    marbleTexture.anisotropy = 16;
+    marbleTexture.repeat.set(3, 3); // Better tiling for columns and walls
+    marbleTexture.anisotropy = 16; // Maximum quality
     marbleTexture.colorSpace = THREE.SRGBColorSpace;
     marbleTexture.needsUpdate = true;
     
+    // Configure wall texture
     wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
     wallTexture.repeat.set(2, 1);
     wallTexture.anisotropy = 16;
     wallTexture.colorSpace = THREE.SRGBColorSpace;
     wallTexture.needsUpdate = true;
     
+    // Configure back wall texture
     backWallTexture.wrapS = backWallTexture.wrapT = THREE.ClampToEdgeWrapping;
     backWallTexture.anisotropy = 16;
     backWallTexture.colorSpace = THREE.SRGBColorSpace;
@@ -469,209 +357,122 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   return (
     <>
-      {/* Bright natural lighting from windows */}
-      <ambientLight intensity={1.2} color="#FFF8F0" />
+      {/* Lighting - Warm Museum Lighting */}
+      <ambientLight intensity={0.45} color="#F5F0E8" />
       
-      {/* Main sunlight from windows - left side */}
+      {/* Main directional light - dramatic side lighting */}
       <directionalLight
-        position={[-20, 15, -5]}
-        intensity={3.5}
+        position={[25, 28, -12]}
+        intensity={2.8}
         color="#FFF8E7"
         castShadow
         shadow-mapSize={[4096, 4096]}
         shadow-camera-near={1}
-        shadow-camera-far={100}
-        shadow-camera-left={-25}
-        shadow-camera-right={25}
+        shadow-camera-far={120}
+        shadow-camera-left={-30}
+        shadow-camera-right={30}
         shadow-camera-top={20}
         shadow-camera-bottom={-20}
-        shadow-radius={2}
+        shadow-radius={3}
         shadow-bias={-0.0001}
       />
       
-      {/* Sunlight from right side windows */}
+      {/* Fill light from opposite side */}
       <directionalLight
-        position={[20, 15, -5]}
-        intensity={3.0}
-        color="#FFF8E7"
+        position={[-15, 20, -8]}
+        intensity={0.8}
+        color="#FFE8C5"
       />
       
-      {/* Fill light from above */}
-      <directionalLight
-        position={[0, 25, -10]}
-        intensity={1.5}
-        color="#FFF5E8"
-      />
+      {/* Warm accent light */}
+      <pointLight position={[0, 5, -6]} intensity={1.2} color="#FFD8A8" distance={15} decay={2} />
 
-      {/* Floor - Polished wood/carpet */}
+      {/* Floor - Polished Marble */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[200, 160]} />
         <meshStandardMaterial 
-          color="#8B7355"
-          metalness={0.0} 
+          map={marbleTexture}
+          metalness={0.08} 
+          roughness={0.15}
+          envMapIntensity={0.5}
+        />
+      </mesh>
+      
+      {/* Logo on floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 2]}>
+        <planeGeometry args={[logoWidth, logoHeight]} />
+        <meshStandardMaterial 
+          map={logoTexture}
+          transparent
+          opacity={0.9}
+          metalness={0.1}
           roughness={0.8}
         />
       </mesh>
 
-      {/* Barrel vaulted ceiling - wooden planks */}
-      {Array.from({ length: 40 }).map((_, i) => {
-        const angle = (i / 40) * Math.PI - Math.PI / 2;
-        const radius = 12;
-        const y = radius * Math.sin(angle) + radius + 0.5;
-        const z = radius * Math.cos(angle) - 8;
-        return (
-          <mesh 
-            key={i} 
-            position={[0, y, z]} 
-            rotation={[-angle, 0, 0]}
-          >
-            <boxGeometry args={[28, 0.15, 1.2]} />
-            <meshStandardMaterial 
-              color="#8B4513" 
-              roughness={0.7}
-              metalness={0.0}
-            />
-          </mesh>
-        );
-      })}
+      {/* Ceiling - Light colored */}
+      <mesh position={[0, 7.0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[40, 40]} />
+        <meshStandardMaterial
+          map={marbleTexture}
+          metalness={0.0}
+          roughness={0.6}
+        />
+      </mesh>
 
-      {/* Barrel vault ribs */}
-      {[-12, -6, 0, 6, 12].map((x) => 
-        Array.from({ length: 20 }).map((_, i) => {
-          const angle = (i / 20) * Math.PI - Math.PI / 2;
-          const radius = 12;
-          const y = radius * Math.sin(angle) + radius + 0.5;
-          const z = radius * Math.cos(angle) - 8;
-          return (
-            <mesh 
-              key={`${x}-${i}`}
-              position={[x, y, z]} 
-              rotation={[-angle, 0, 0]}
-            >
-              <boxGeometry args={[0.3, 0.2, 1.2]} />
-              <meshStandardMaterial color="#654321" roughness={0.6} />
-            </mesh>
-          );
-        })
-      )}
+      {/* Backdrop wall with photo */}
+      <mesh position={[0, backdropHeight * 0.5 - 1.0, -12]}>
+        <planeGeometry args={[backdropWidth, backdropHeight]} />
+        <meshStandardMaterial map={backdropTexture} roughness={1.0} metalness={0.0} />
+      </mesh>
 
-      {/* Stone walls with arched alcoves - Left side */}
-      <group position={[-13, 0, -8]}>
-        {/* Main wall */}
-        <mesh rotation={[0, Math.PI / 2, 0]}>
-          <planeGeometry args={[35, 15]} />
-          <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-        </mesh>
-        
-        {/* Columns */}
-        {[-10, -5, 0, 5, 10].map((z) => (
-          <mesh key={z} position={[0.5, 4, z]}>
-            <cylinderGeometry args={[0.5, 0.6, 8, 16]} />
-            <meshStandardMaterial color="#C4B5A0" roughness={0.6} />
-          </mesh>
-        ))}
-        
-        {/* Arched windows */}
-        <ArchedWindow position={[0.8, 5, -7.5]} rotation={[0, Math.PI / 2, 0]} />
-        <ArchedWindow position={[0.8, 5, -2.5]} rotation={[0, Math.PI / 2, 0]} />
-        <ArchedWindow position={[0.8, 5, 2.5]} rotation={[0, Math.PI / 2, 0]} />
-        <ArchedWindow position={[0.8, 5, 7.5]} rotation={[0, Math.PI / 2, 0]} />
-      </group>
+      {/* Side walls - Museum style */}
+      <mesh position={[-12, 4, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[20, 10]} />
+        <meshStandardMaterial 
+          map={wallTexture} 
+          roughness={0.8} 
+          metalness={0.0} 
+        />
+      </mesh>
+      <mesh position={[12, 4, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[20, 10]} />
+        <meshStandardMaterial 
+          map={wallTexture} 
+          roughness={0.8} 
+          metalness={0.0} 
+        />
+      </mesh>
 
-      {/* Stone walls with arched alcoves - Right side */}
-      <group position={[13, 0, -8]}>
-        {/* Main wall */}
-        <mesh rotation={[0, -Math.PI / 2, 0]}>
-          <planeGeometry args={[35, 15]} />
-          <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-        </mesh>
-        
-        {/* Columns */}
-        {[-10, -5, 0, 5, 10].map((z) => (
-          <mesh key={z} position={[-0.5, 4, z]}>
-            <cylinderGeometry args={[0.5, 0.6, 8, 16]} />
-            <meshStandardMaterial color="#C4B5A0" roughness={0.6} />
-          </mesh>
-        ))}
-        
-        {/* Arched windows */}
-        <ArchedWindow position={[-0.8, 5, -7.5]} rotation={[0, -Math.PI / 2, 0]} />
-        <ArchedWindow position={[-0.8, 5, -2.5]} rotation={[0, -Math.PI / 2, 0]} />
-        <ArchedWindow position={[-0.8, 5, 2.5]} rotation={[0, -Math.PI / 2, 0]} />
-        <ArchedWindow position={[-0.8, 5, 7.5]} rotation={[0, -Math.PI / 2, 0]} />
-      </group>
+      {/* Back receiver wall - Museum interior */}
+      <mesh position={[0, 4, -9.2]} receiveShadow>
+        <planeGeometry args={[40, 10]} />
+        <meshStandardMaterial 
+          map={backWallTexture} 
+          roughness={0.7} 
+          metalness={0.0} 
+        />
+      </mesh>
 
-      {/* Back wall with large arched window */}
-      <group position={[0, 0, -25]}>
-        <mesh>
-          <planeGeometry args={[28, 15]} />
-          <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-        </mesh>
-        <ArchedWindow position={[0, 6, 0.5]} />
-      </group>
+      {/* Shadow plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, -7.8]} receiveShadow>
+        <planeGeometry args={[24, 8]} />
+        <shadowMaterial opacity={0.25} />
+      </mesh>
 
-      {/* Bookshelves - Left side */}
-      {[-10, -5, 0, 5].map((z) => (
-        <Bookshelf key={`left-${z}`} position={[-11, 1.5, z]} rotation={[0, Math.PI / 2, 0]} />
-      ))}
-
-      {/* Bookshelves - Right side */}
-      {[-10, -5, 0, 5].map((z) => (
-        <Bookshelf key={`right-${z}`} position={[11, 1.5, z]} rotation={[0, -Math.PI / 2, 0]} />
-      ))}
-
-      {/* Reading tables down center */}
-      {[-10, -5, 0, 5, 10].map((z) => (
-        <group key={`table-${z}`} position={[0, 0, z]}>
-          {/* Table */}
-          <mesh position={[0, 0.9, 0]}>
-            <boxGeometry args={[6, 0.1, 2]} />
-            <meshStandardMaterial color="#8B6F47" roughness={0.6} />
-          </mesh>
-          {/* Table legs */}
-          {[[-2.5, -0.8], [2.5, -0.8], [-2.5, 0.8], [2.5, 0.8]].map(([x, z], i) => (
-            <mesh key={i} position={[x, 0.45, z]}>
-              <cylinderGeometry args={[0.08, 0.08, 0.9, 8]} />
-              <meshStandardMaterial color="#654321" />
-            </mesh>
-          ))}
-          
-          {/* Chairs */}
-          {[-3, -1.5, 1.5, 3].map((x) => (
-            <group key={`chair-${x}`} position={[x, 0.5, x > 0 ? 1.5 : -1.5]} rotation={[0, x > 0 ? Math.PI : 0, 0]}>
-              {/* Seat */}
-              <mesh position={[0, 0, 0]}>
-                <boxGeometry args={[0.5, 0.05, 0.5]} />
-                <meshStandardMaterial color="#8B6F47" />
-              </mesh>
-              {/* Back */}
-              <mesh position={[0, 0.4, -0.2]}>
-                <boxGeometry args={[0.5, 0.7, 0.05]} />
-                <meshStandardMaterial color="#8B6F47" />
-              </mesh>
-            </group>
-          ))}
-        </group>
-      ))}
-
-      {/* Crystal chandeliers */}
-      <Chandelier position={[0, 11.5, -15]} />
-      <Chandelier position={[0, 11.5, -5]} />
-      <Chandelier position={[0, 11.5, 5]} />
-
-      {/* Doors - now integrated into the library */}
+      {/* Doors */}
       {DOORS.map((door) => (
         <Door key={door.key} doorData={door} onDoorClick={onDoorClick} marbleTexture={marbleTexture} />
       ))}
 
-      {/* Dust particles in light rays */}
+      {/* Dust particles */}
       <points ref={particlesRef}>
         <bufferGeometry {...particlesGeometry} />
         <pointsMaterial
-          size={0.012}
+          size={0.018}
           color={0xffffff}
           transparent
-          opacity={0.25}
+          opacity={0.18}
           depthWrite={false}
         />
       </points>
@@ -680,8 +481,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         enablePan={false}
         enableZoom={false}
-        minPolarAngle={Math.PI * 0.2}
-        maxPolarAngle={Math.PI * 0.48}
+        minPolarAngle={Math.PI * 0.15}
+        maxPolarAngle={Math.PI * 0.49}
         rotateSpeed={0.5}
         enableDamping
         dampingFactor={0.06}
