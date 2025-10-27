@@ -234,14 +234,14 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   return (
     <>
       {/* Ambient base lighting - brighter to fill room */}
-      <ambientLight intensity={0.8} color="#F5E8DC" />
+      <ambientLight intensity={1.2} color="#F5E8DC" />
       
-      {/* Strong warm diffused skylight - positioned at skylight opening */}
+      {/* Warm diffused skylight - positioned at skylight opening */}
       <group position={[0, 6.5, 0]}>
-        {/* Main directional through skylight - stronger */}
+        {/* Main directional through skylight */}
         <directionalLight
           position={[0, 3, 0]}
-          intensity={3.5}
+          intensity={2.8}
           color="#FFE8C8"
           castShadow
           shadow-mapSize={[2048, 2048]}
@@ -255,30 +255,31 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           shadow-radius={3}
         />
         
-        {/* Multiple strong point lights for room-filling diffusion */}
-        <pointLight position={[-3, 0.5, -2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
-        <pointLight position={[3, 0.5, -2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
-        <pointLight position={[-3, 0.5, 2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
-        <pointLight position={[3, 0.5, 2]} intensity={3.2} color="#FFF0D6" distance={18} decay={1.2} />
-        <pointLight position={[0, 0.5, 0]} intensity={3.5} color="#FFECD0" distance={20} decay={1.2} />
+        {/* Spread out point lights for even diffusion */}
+        <pointLight position={[-4, 0.5, -3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
+        <pointLight position={[4, 0.5, -3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
+        <pointLight position={[-4, 0.5, 3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
+        <pointLight position={[4, 0.5, 3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
+        <pointLight position={[-2, 0.5, 0]} intensity={1.8} color="#FFECD0" distance={18} decay={1.1} />
+        <pointLight position={[2, 0.5, 0]} intensity={1.8} color="#FFECD0" distance={18} decay={1.1} />
       </group>
       
-      {/* Directional fill from skylight angle */}
+      {/* Directional fill from skylight angles */}
       <directionalLight
-        position={[4, 8, 3]}
-        intensity={1.2}
+        position={[5, 8, 4]}
+        intensity={0.8}
         color="#FFF5E8"
       />
       <directionalLight
-        position={[-4, 8, -3]}
-        intensity={1.2}
+        position={[-5, 8, -4]}
+        intensity={0.8}
         color="#FFF5E8"
       />
       
       {/* Warm reflected light from wood surfaces */}
       <pointLight 
         position={[0, 1.5, 0]} 
-        intensity={1.2} 
+        intensity={0.8} 
         color="#D4B896" 
         distance={15} 
         decay={1.5}
@@ -418,37 +419,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           size={0.025}
           color="#FFF8E8"
           transparent
-          opacity={0.35}
+          opacity={0.25}
           depthWrite={false}
           sizeAttenuation={true}
           blending={THREE.AdditiveBlending}
         />
       </points>
-      
-      {/* Soft volumetric light beam from skylight - aligned with skylight opening */}
-      <mesh position={[0, 3.5, 0]}>
-        <boxGeometry args={[7.5, 6, 5.5]} />
-        <meshBasicMaterial
-          color="#FFE8C0"
-          transparent
-          opacity={0.04}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-      
-      {/* Diffused glow at skylight panel */}
-      <mesh position={[0, 5.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[8, 6]} />
-        <meshBasicMaterial
-          color="#FFECD6"
-          transparent
-          opacity={0.15}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
 
       <OrbitControls
         enablePan={false}
