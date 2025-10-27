@@ -2,7 +2,7 @@ import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import backdropImage from '@/assets/museum-backdrop.jpg';
+import backdropImage from '@/assets/museum-scene.svg';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
 import marblePattern from '@/assets/textures/marble/marble-pattern.svg';
 import museumWall from '@/assets/museum-wall.png';
