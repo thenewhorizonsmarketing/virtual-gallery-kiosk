@@ -389,17 +389,22 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       particlesRef.current.rotation.y += delta * 0.02;
     }
     
-    // Smooth camera transition with easing
-    const lerpFactor = 1 - Math.pow(0.001, delta); // Smooth easing
-    camera.position.lerp(targetCameraPos.current, lerpFactor);
-    
-    // Check if animation is complete
-    const distance = camera.position.distanceTo(targetCameraPos.current);
-    if (distance < 0.01 && isAnimating.current) {
-      isAnimating.current = false;
-      if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
-        hasNotifiedComplete.current = true;
-        onZoomComplete(selectedRoom);
+    // Only animate camera when actively transitioning to/from a door
+    if (isAnimating.current) {
+      // Smooth camera transition with easing
+      const lerpFactor = 1 - Math.pow(0.001, delta); // Smooth easing
+      camera.position.lerp(targetCameraPos.current, lerpFactor);
+      
+      // Check if animation is complete
+      const distance = camera.position.distanceTo(targetCameraPos.current);
+      if (distance < 0.01) {
+        isAnimating.current = false;
+        // Update target to current position to prevent snapping back
+        targetCameraPos.current.copy(camera.position);
+        if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
+          hasNotifiedComplete.current = true;
+          onZoomComplete(selectedRoom);
+        }
       }
     }
   });
