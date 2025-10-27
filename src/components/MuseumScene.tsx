@@ -163,19 +163,33 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const hasNotifiedComplete = useRef(false);
 
   const particlesGeometry = useMemo(() => {
-    const positions = new Float32Array(800 * 3);
-    for (let i = 0; i < 800 * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 36;
+    const positions = new Float32Array(2000 * 3);
+    for (let i = 0; i < 2000; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 24; // x
+      positions[i * 3 + 1] = Math.random() * 6; // y - from floor to ceiling
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 24; // z
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     return geometry;
   }, []);
 
-  // Handle camera zoom animations
+  // Handle camera zoom animations and particle movement
   useFrame((state, delta) => {
     if (particlesRef.current) {
-      particlesRef.current.rotation.y += delta * 0.02;
+      particlesRef.current.rotation.y += delta * 0.01;
+      
+      // Animate particles floating up
+      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+      for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 1] += delta * 0.05; // Slow upward drift
+        
+        // Reset particle when it reaches ceiling
+        if (positions[i + 1] > 6) {
+          positions[i + 1] = 0;
+        }
+      }
+      particlesRef.current.geometry.attributes.position.needsUpdate = true;
     }
     
     // Only animate camera when actively transitioning to/from a door
@@ -220,29 +234,53 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   return (
     <>
       {/* Natural skylight lighting */}
-      <ambientLight intensity={0.6} color="#F5EFE7" />
+      <ambientLight intensity={0.4} color="#F5EFE7" />
       
       {/* Main skylight - strong directional from above */}
       <directionalLight
-        position={[0, 20, 0]}
-        intensity={3.5}
-        color="#FFF9F0"
+        position={[0, 15, 0]}
+        intensity={4.5}
+        color="#FFF9E8"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[4096, 4096]}
         shadow-camera-near={1}
-        shadow-camera-far={30}
-        shadow-camera-left={-12}
-        shadow-camera-right={12}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
-        shadow-bias={-0.0001}
+        shadow-camera-far={25}
+        shadow-camera-left={-14}
+        shadow-camera-right={14}
+        shadow-camera-top={14}
+        shadow-camera-bottom={-14}
+        shadow-bias={-0.0005}
+        shadow-radius={2}
       />
       
-      {/* Soft fill light */}
+      {/* Angled skylight rays for realism */}
       <directionalLight
-        position={[5, 10, 5]}
-        intensity={0.8}
-        color="#FFF5E8"
+        position={[3, 12, -2]}
+        intensity={2.0}
+        color="#FFF5D6"
+        castShadow={false}
+      />
+      <directionalLight
+        position={[-3, 12, 2]}
+        intensity={2.0}
+        color="#FFF5D6"
+        castShadow={false}
+      />
+      
+      {/* Soft ambient fill */}
+      <directionalLight
+        position={[8, 8, 8]}
+        intensity={0.6}
+        color="#FFF8F0"
+      />
+      
+      {/* Warm bounce light from floor */}
+      <pointLight 
+        position={[0, 1, 0]} 
+        intensity={0.8} 
+        color="#D4B896" 
+        distance={12} 
+        decay={2}
       />
 
       {/* Herringbone parquet floor */}
@@ -372,17 +410,32 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         <WoodenDoor key={door.key} doorData={door} onDoorClick={onDoorClick} />
       ))}
 
-      {/* Dust particles */}
+      {/* Atmospheric dust particles */}
       <points ref={particlesRef}>
         <bufferGeometry {...particlesGeometry} />
         <pointsMaterial
-          size={0.018}
-          color={0xffffff}
+          size={0.025}
+          color="#FFF8E8"
           transparent
-          opacity={0.18}
+          opacity={0.35}
           depthWrite={false}
+          sizeAttenuation={true}
+          blending={THREE.AdditiveBlending}
         />
       </points>
+      
+      {/* Light beam effect from skylight */}
+      <mesh position={[0, 3, 0]}>
+        <cylinderGeometry args={[3.5, 4, 6, 32, 1, true]} />
+        <meshBasicMaterial
+          color="#FFF9E8"
+          transparent
+          opacity={0.08}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
 
       <OrbitControls
         enablePan={false}
