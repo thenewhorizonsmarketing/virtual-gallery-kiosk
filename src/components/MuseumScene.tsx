@@ -262,8 +262,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   }, [marbleTexture]);
   
   // Store initial camera position
-  const initialCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 1.75, 10.5));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 1.8, 8.5));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 1.8, 8.5));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
