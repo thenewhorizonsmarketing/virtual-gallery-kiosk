@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import backdropImage from '@/assets/museum-backdrop.jpg';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
 import marblePattern from '@/assets/textures/marble/marble-pattern.svg';
+import museumWall from '@/assets/museum-wall.png';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -248,6 +249,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const backdropTexture = useTexture(backdropImage);
   const logoTexture = useTexture(schoolLogo);
   const marbleTexture = useTexture(marblePattern);
+  const wallTexture = useTexture(museumWall);
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
@@ -259,7 +261,14 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     marbleTexture.anisotropy = 16; // Maximum quality
     marbleTexture.colorSpace = THREE.SRGBColorSpace;
     marbleTexture.needsUpdate = true;
-  }, [marbleTexture]);
+    
+    // Configure wall texture
+    wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
+    wallTexture.repeat.set(2, 1);
+    wallTexture.anisotropy = 16;
+    wallTexture.colorSpace = THREE.SRGBColorSpace;
+    wallTexture.needsUpdate = true;
+  }, [marbleTexture, wallTexture]);
   
   // Store initial camera position
   const initialCameraPos = useRef(new THREE.Vector3(0, 1.8, 8.5));
@@ -409,20 +418,20 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         <meshStandardMaterial map={backdropTexture} roughness={1.0} metalness={0.0} />
       </mesh>
 
-      {/* Side walls - Warm limestone */}
+      {/* Side walls - Museum style */}
       <mesh position={[-12, 4, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
         <meshStandardMaterial 
-          map={marbleTexture} 
-          roughness={0.7} 
+          map={wallTexture} 
+          roughness={0.8} 
           metalness={0.0} 
         />
       </mesh>
       <mesh position={[12, 4, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
         <meshStandardMaterial 
-          map={marbleTexture} 
-          roughness={0.7} 
+          map={wallTexture} 
+          roughness={0.8} 
           metalness={0.0} 
         />
       </mesh>
