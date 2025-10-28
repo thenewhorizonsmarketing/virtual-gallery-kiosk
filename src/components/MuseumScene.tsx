@@ -244,7 +244,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           intensity={2.8}
           color="#FFE8C8"
           castShadow
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
           shadow-camera-near={0.5}
           shadow-camera-far={10}
           shadow-camera-left={-12}
