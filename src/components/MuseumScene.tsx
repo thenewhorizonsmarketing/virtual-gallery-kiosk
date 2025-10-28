@@ -25,8 +25,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
   
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 8));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 8));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 0));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
