@@ -20,7 +20,7 @@ const DOORS = [
 
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   // Load the GLTF room model
-  const { scene: gltfScene } = useGLTF('/models/room_packshot.gltf');
+  const { scene: gltfScene } = useGLTF('/room_packshot.glb');
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
