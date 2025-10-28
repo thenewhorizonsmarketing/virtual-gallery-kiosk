@@ -353,7 +353,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         </mesh>
         {/* Decorative panels on upper wall */}
         {[-6, -2, 2, 6].map((z) => (
-          <mesh key={z} position={[0.01, 4.2, z]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh key={z} position={[0.05, 4.2, z]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[2.8, 2.4]} />
             <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
           </mesh>
@@ -371,7 +371,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
         </mesh>
         {[-6, -2, 2, 6].map((z) => (
-          <mesh key={z} position={[-0.01, 4.2, z]} rotation={[0, -Math.PI / 2, 0]}>
+          <mesh key={z} position={[-0.05, 4.2, z]} rotation={[0, -Math.PI / 2, 0]}>
             <planeGeometry args={[2.8, 2.4]} />
             <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
           </mesh>
@@ -389,7 +389,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
         </mesh>
         {[-8, -4, 0, 4, 8].map((x) => (
-          <mesh key={x} position={[x, 4.2, 0.01]}>
+          <mesh key={x} position={[x, 4.2, 0.05]}>
             <planeGeometry args={[2.8, 2.4]} />
             <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
           </mesh>
