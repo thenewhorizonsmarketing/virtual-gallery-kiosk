@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import schoolLogo from '@/assets/school-of-law-logo.svg';
+import herringboneFloor from '@/assets/textures/herringbone-parquet.svg';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -148,7 +149,7 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
 
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   const logoTexture = useTexture(schoolLogo);
-  const floorTexture = useTexture('/src/assets/textures/herringbone-wood-floor.jpg');
+  const floorTexture = useTexture(herringboneFloor);
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
