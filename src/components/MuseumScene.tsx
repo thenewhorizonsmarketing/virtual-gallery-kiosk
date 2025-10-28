@@ -148,6 +148,7 @@ function createLabelTexture(text: string): THREE.CanvasTexture {
 
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   const logoTexture = useTexture(schoolLogo);
+  const floorTexture = useTexture('/src/assets/textures/herringbone-wood-floor.jpg');
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
@@ -155,7 +156,13 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   useEffect(() => {
     logoTexture.anisotropy = 8;
     logoTexture.colorSpace = THREE.SRGBColorSpace;
-  }, [logoTexture]);
+    
+    // Configure floor texture for herringbone pattern
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(8, 8);
+    floorTexture.anisotropy = 16;
+    floorTexture.colorSpace = THREE.SRGBColorSpace;
+  }, [logoTexture, floorTexture]);
   
   const initialCameraPos = useRef(new THREE.Vector3(0, 2.5, 10));
   const targetCameraPos = useRef(new THREE.Vector3(0, 2.5, 10));
@@ -233,66 +240,48 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   return (
     <>
-      {/* Ambient base lighting - brighter to fill room */}
-      <ambientLight intensity={1.2} color="#F5E8DC" />
+      {/* Soft ambient base lighting */}
+      <ambientLight intensity={0.8} color="#FFF5E8" />
       
-      {/* Warm diffused skylight - positioned at skylight opening */}
-      <group position={[0, 6.5, 0]}>
-        {/* Main directional through skylight */}
-        <directionalLight
-          position={[0, 3, 0]}
-          intensity={2.8}
-          color="#FFE8C8"
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-near={0.5}
-          shadow-camera-far={10}
-          shadow-camera-left={-12}
-          shadow-camera-right={12}
-          shadow-camera-top={12}
-          shadow-camera-bottom={-12}
-          shadow-bias={-0.0003}
-          shadow-radius={3}
-        />
-        
-        {/* Spread out point lights for even diffusion */}
-        <pointLight position={[-4, 0.5, -3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
-        <pointLight position={[4, 0.5, -3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
-        <pointLight position={[-4, 0.5, 3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
-        <pointLight position={[4, 0.5, 3]} intensity={2.0} color="#FFF0D6" distance={20} decay={1.1} />
-        <pointLight position={[-2, 0.5, 0]} intensity={1.8} color="#FFECD0" distance={18} decay={1.1} />
-        <pointLight position={[2, 0.5, 0]} intensity={1.8} color="#FFECD0" distance={18} decay={1.1} />
-      </group>
+      {/* Main soft hemisphere light for even illumination */}
+      <hemisphereLight
+        color="#FFF8F0"
+        groundColor="#E8DCC8"
+        intensity={1.2}
+        position={[0, 8, 0]}
+      />
       
-      {/* Directional fill from skylight angles */}
+      {/* Soft skylight - gentle top-down illumination */}
       <directionalLight
-        position={[5, 8, 4]}
-        intensity={0.8}
+        position={[0, 10, 0]}
+        intensity={1.5}
         color="#FFF5E8"
-      />
-      <directionalLight
-        position={[-5, 8, -4]}
-        intensity={0.8}
-        color="#FFF5E8"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={0.5}
+        shadow-camera-far={15}
+        shadow-camera-left={-12}
+        shadow-camera-right={12}
+        shadow-camera-top={12}
+        shadow-camera-bottom={-12}
+        shadow-bias={-0.0005}
+        shadow-radius={8}
       />
       
-      {/* Warm reflected light from wood surfaces */}
-      <pointLight 
-        position={[0, 1.5, 0]} 
-        intensity={0.8} 
-        color="#D4B896" 
-        distance={15} 
-        decay={1.5}
-      />
+      {/* Subtle fill lights for depth - very soft */}
+      <pointLight position={[-8, 4, -6]} intensity={0.4} color="#FFF8F0" distance={18} decay={2} />
+      <pointLight position={[8, 4, -6]} intensity={0.4} color="#FFF8F0" distance={18} decay={2} />
+      <pointLight position={[-8, 4, 4]} intensity={0.4} color="#FFF8F0" distance={18} decay={2} />
+      <pointLight position={[8, 4, 4]} intensity={0.4} color="#FFF8F0" distance={18} decay={2} />
 
-      {/* Herringbone parquet floor */}
+      {/* Herringbone wood floor with texture */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, 0, 0]}>
         <planeGeometry args={[24, 24]} />
         <meshStandardMaterial 
-          color="#9B7653"
-          roughness={0.7}
-          metalness={0.05}
+          map={floorTexture}
+          roughness={0.85}
+          metalness={0.0}
         />
       </mesh>
       
@@ -307,106 +296,56 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         />
       </mesh>
 
-      {/* Coffered ceiling with skylight */}
+      {/* Simple flat ceiling with soft skylight glow */}
       <group position={[0, 6, 0]}>
         {/* Main ceiling surface */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <planeGeometry args={[24, 24]} />
-          <meshStandardMaterial color="#C4B5A0" roughness={0.8} />
-        </mesh>
-        
-        {/* Ceiling coffers */}
-        {[-4, -2, 0, 2, 4].map((x) =>
-          [-6, -4, -2, 0, 2, 4].map((z) => (
-            <mesh key={`${x}-${z}`} position={[x, -0.1, z]} rotation={[Math.PI / 2, 0, 0]}>
-              <boxGeometry args={[1.6, 1.6, 0.15]} />
-              <meshStandardMaterial color="#B5A68F" roughness={0.7} />
-            </mesh>
-          ))
-        )}
-        
-        {/* Skylight frame */}
-        <mesh position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[8, 6]} />
           <meshStandardMaterial 
-            color="#FFF9F0" 
-            transparent 
-            opacity={0.7}
-            emissive="#FFF9E8"
-            emissiveIntensity={0.5}
+            color="#F5EFE8" 
+            roughness={0.95}
+            emissive="#FFF9F0"
+            emissiveIntensity={0.1}
           />
         </mesh>
       </group>
 
-      {/* Walls with wood wainscoting */}
+      {/* Smooth cream walls - single surface from floor to ceiling */}
       {/* Left wall */}
-      <group position={[-12, 0, -2]}>
-        {/* Wood paneling lower */}
-        <mesh position={[0, 1.5, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <planeGeometry args={[20, 3]} />
-          <meshStandardMaterial color="#8B6F47" roughness={0.6} />
-        </mesh>
-        {/* Cream upper wall */}
-        <mesh position={[0, 4.2, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <planeGeometry args={[20, 3.6]} />
-          <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
-        </mesh>
-        {/* Decorative panels on upper wall */}
-        {[-6, -2, 2, 6].map((z) => (
-          <mesh key={z} position={[0.05, 4.2, z]} rotation={[0, Math.PI / 2, 0]}>
-            <planeGeometry args={[2.8, 2.4]} />
-            <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-          </mesh>
-        ))}
-      </group>
+      <mesh position={[-12, 3, -2]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[20, 6]} />
+        <meshStandardMaterial 
+          color="#F5E8DC" 
+          roughness={0.95}
+        />
+      </mesh>
 
       {/* Right wall */}
-      <group position={[12, 0, -2]}>
-        <mesh position={[0, 1.5, 0]} rotation={[0, -Math.PI / 2, 0]}>
-          <planeGeometry args={[20, 3]} />
-          <meshStandardMaterial color="#8B6F47" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 4.2, 0]} rotation={[0, -Math.PI / 2, 0]}>
-          <planeGeometry args={[20, 3.6]} />
-          <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
-        </mesh>
-        {[-6, -2, 2, 6].map((z) => (
-          <mesh key={z} position={[-0.05, 4.2, z]} rotation={[0, -Math.PI / 2, 0]}>
-            <planeGeometry args={[2.8, 2.4]} />
-            <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-          </mesh>
-        ))}
-      </group>
+      <mesh position={[12, 3, -2]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[20, 6]} />
+        <meshStandardMaterial 
+          color="#F5E8DC" 
+          roughness={0.95}
+        />
+      </mesh>
 
       {/* Back wall */}
-      <group position={[0, 0, -10]}>
-        <mesh position={[0, 1.5, 0]}>
-          <planeGeometry args={[24, 3]} />
-          <meshStandardMaterial color="#8B6F47" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 4.2, 0]}>
-          <planeGeometry args={[24, 3.6]} />
-          <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
-        </mesh>
-        {[-8, -4, 0, 4, 8].map((x) => (
-          <mesh key={x} position={[x, 4.2, 0.05]}>
-            <planeGeometry args={[2.8, 2.4]} />
-            <meshStandardMaterial color="#D4C5A9" roughness={0.8} />
-          </mesh>
-        ))}
-      </group>
+      <mesh position={[0, 3, -10]} receiveShadow>
+        <planeGeometry args={[24, 6]} />
+        <meshStandardMaterial 
+          color="#F5E8DC" 
+          roughness={0.95}
+        />
+      </mesh>
 
       {/* Front wall */}
-      <group position={[0, 0, 6]}>
-        <mesh position={[0, 1.5, 0]} rotation={[0, Math.PI, 0]}>
-          <planeGeometry args={[24, 3]} />
-          <meshStandardMaterial color="#8B6F47" roughness={0.6} />
-        </mesh>
-        <mesh position={[0, 4.2, 0]} rotation={[0, Math.PI, 0]}>
-          <planeGeometry args={[24, 3.6]} />
-          <meshStandardMaterial color="#E8DCC8" roughness={0.9} />
-        </mesh>
-      </group>
+      <mesh position={[0, 3, 6]} rotation={[0, Math.PI, 0]} receiveShadow>
+        <planeGeometry args={[24, 6]} />
+        <meshStandardMaterial 
+          color="#F5E8DC" 
+          roughness={0.95}
+        />
+      </mesh>
 
       {/* Wooden doors */}
       {DOORS.map((door) => (
