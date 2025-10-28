@@ -25,8 +25,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
   
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 8));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 8));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
@@ -112,37 +112,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <pointLight position={[-3, 3, 3]} intensity={0.8} color="#FFF8F0" distance={15} decay={2} />
       <pointLight position={[3, 3, 3]} intensity={0.8} color="#FFF8F0" distance={15} decay={2} />
 
-      {/* GLTF Room Model - duplicated to create complete room */}
-      {/* Front wall */}
+      {/* GLTF Room Model - scaled and positioned */}
       <primitive 
-        object={gltfScene.clone()} 
+        object={gltfScene} 
         scale={[2, 2, 2]} 
-        position={[0, 0, 4]}
+        position={[0, 0, 0]}
         rotation={[0, 0, 0]}
-      />
-      
-      {/* Back wall */}
-      <primitive 
-        object={gltfScene.clone()} 
-        scale={[2, 2, 2]} 
-        position={[0, 0, -4]}
-        rotation={[0, Math.PI, 0]}
-      />
-      
-      {/* Left wall */}
-      <primitive 
-        object={gltfScene.clone()} 
-        scale={[2, 2, 2]} 
-        position={[-4, 0, 0]}
-        rotation={[0, Math.PI / 2, 0]}
-      />
-      
-      {/* Right wall */}
-      <primitive 
-        object={gltfScene.clone()} 
-        scale={[2, 2, 2]} 
-        position={[4, 0, 0]}
-        rotation={[0, -Math.PI / 2, 0]}
       />
 
       {/* Invisible clickable door areas positioned over GLTF doors */}
