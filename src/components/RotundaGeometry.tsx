@@ -187,26 +187,28 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       })}
 
 
-      {/* Doorway title text - positioned to face center */}
+      {/* Doorway title text - positioned inside wall facing center */}
       {DOORWAY_ANGLES.map((angle, i) => {
         const title = DOORWAY_TITLES[i];
-        const textRadius = radius + 0.55; // Just inside the wall
+        const textRadius = radius - 0.5; // Position well inside the rotunda
         const x = Math.cos(angle) * textRadius;
         const z = Math.sin(angle) * textRadius;
-        
+
         return (
           <Text
             key={`doorway-title-${i}`}
             position={[x, 5.6, z]}
-            rotation={[0, angle, 0]}
-            fontSize={0.7}
+            rotation={[0, angle + Math.PI, 0]}
+            fontSize={1.2}
             color="#2C3E50"
             anchorX="center"
             anchorY="middle"
-            outlineWidth={0.02}
-            outlineColor="#FFFFFF"
+            textAlign="center"
+            maxWidth={4}
             letterSpacing={0.05}
-            maxWidth={3}
+            outlineWidth={0.03}
+            outlineColor="#FFFFFF"
+            depthOffset={-1}
           >
             {title}
           </Text>
