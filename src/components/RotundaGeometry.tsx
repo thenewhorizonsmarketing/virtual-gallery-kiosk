@@ -13,22 +13,43 @@ const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
 const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
-  // Calculate column positions - evenly spaced around the rotunda
+  // Calculate column positions - only between doorways
   const columnPositions = useMemo(() => {
     const positions: Array<{ x: number; z: number; angle: number }> = [];
+    const columnsPerSegment = 2; // 2 columns per wall segment = 8 total
+    const safetyMargin = Math.PI / 24; // 7.5° margin from doorway edges
     
-    // Evenly space columns around the rotunda
-    for (let i = 0; i < columnCount; i++) {
-      const angle = (i / columnCount) * Math.PI * 2;
-      positions.push({
-        x: Math.cos(angle) * (radius - 1),
-        z: Math.sin(angle) * (radius - 1),
-        angle: angle,
-      });
+    // For each pair of adjacent doorways, create a wall segment
+    for (let i = 0; i < DOORWAY_ANGLES.length; i++) {
+      const doorAngle = DOORWAY_ANGLES[i];
+      const nextDoorAngle = DOORWAY_ANGLES[(i + 1) % DOORWAY_ANGLES.length];
+      
+      // Calculate wall segment boundaries (after this door, before next door)
+      const segmentStart = doorAngle + DOORWAY_WIDTH / 2 + safetyMargin;
+      let segmentEnd = nextDoorAngle - DOORWAY_WIDTH / 2 - safetyMargin;
+      
+      // Handle wrap-around for the last segment
+      if (segmentEnd < segmentStart) {
+        segmentEnd += Math.PI * 2;
+      }
+      
+      const segmentSpan = segmentEnd - segmentStart;
+      
+      // Place columns evenly within this wall segment
+      for (let j = 0; j < columnsPerSegment; j++) {
+        const angle = segmentStart + (segmentSpan * (j + 1) / (columnsPerSegment + 1));
+        const normalizedAngle = angle % (Math.PI * 2);
+        
+        positions.push({
+          x: Math.cos(normalizedAngle) * (radius - 1),
+          z: Math.sin(normalizedAngle) * (radius - 1),
+          angle: normalizedAngle,
+        });
+      }
     }
     
     return positions;
-  }, [radius, columnCount]);
+  }, [radius]);
 
 
 
@@ -89,8 +110,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         </mesh>
       </group>
 
-      {/* Columns with square plinths - every other column */}
-      {columnPositions.filter((_, i) => i % 2 === 0).map((pos, i) => (
+      {/* Columns with square plinths - positioned in wall segments only */}
+      {columnPositions.map((pos, i) => (
         <group key={`column-${i}`} position={[pos.x, 0, pos.z]}>
           {/* Square plinth base */}
           <mesh castShadow receiveShadow>
