@@ -134,16 +134,27 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     if (selectedRoom) {
       const door = DOORS.find(d => d.key === selectedRoom);
       if (door) {
-        targetCameraPos.current.set(door.position[0], 2, door.position[2] + 2.5);
+        const newTarget = new THREE.Vector3(door.position[0], 2, door.position[2] + 2.5);
+        const distance = camera.position.distanceTo(newTarget);
+        
+        // Only animate if we're actually moving somewhere (distance > 0.5 units)
+        if (distance > 0.5) {
+          targetCameraPos.current.copy(newTarget);
+          isAnimating.current = true;
+          hasNotifiedComplete.current = false;
+        }
+      }
+    } else {
+      const distance = camera.position.distanceTo(initialCameraPos.current);
+      
+      // Only animate back to center if we're not already there
+      if (distance > 0.5) {
+        targetCameraPos.current.copy(initialCameraPos.current);
         isAnimating.current = true;
         hasNotifiedComplete.current = false;
       }
-    } else {
-      targetCameraPos.current.copy(initialCameraPos.current);
-      isAnimating.current = true;
-      hasNotifiedComplete.current = false;
     }
-  }, [selectedRoom]);
+  }, [selectedRoom, camera]);
 
   return (
     <>
