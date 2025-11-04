@@ -187,25 +187,46 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       })}
 
 
-      {/* Doorway title text */}
+      {/* Doorway title text - curved around doorways */}
       {DOORWAY_ANGLES.map((angle, i) => {
-        const x = Math.cos(angle) * (radius + 0.5);
-        const z = Math.sin(angle) * (radius + 0.5);
+        const title = DOORWAY_TITLES[i];
+        const words = title.split(' ');
+        const totalWords = words.length;
+        
+        // Calculate angular spread for text (slightly less than doorway width)
+        const textSpread = DOORWAY_WIDTH * 0.7; // 70% of doorway width
+        const anglePerWord = textSpread / Math.max(1, totalWords - 1);
+        const startAngle = angle - textSpread / 2;
         
         return (
-          <Text
-            key={`doorway-title-${i}`}
-            position={[x * 1.15, 5.8, z * 1.15]}
-            rotation={[0, angle + Math.PI, 0]}
-            fontSize={1.2}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.08}
-            outlineColor="#000000"
-          >
-            {DOORWAY_TITLES[i]}
-          </Text>
+          <group key={`doorway-title-${i}`}>
+            {words.map((word, wordIndex) => {
+              const wordAngle = totalWords === 1 
+                ? angle 
+                : startAngle + (anglePerWord * wordIndex);
+              
+              const textRadius = radius + 1.2;
+              const x = Math.cos(wordAngle) * textRadius;
+              const z = Math.sin(wordAngle) * textRadius;
+              
+              return (
+                <Text
+                  key={`word-${wordIndex}`}
+                  position={[x, 6.5, z]}
+                  rotation={[0, wordAngle + Math.PI, 0]}
+                  fontSize={0.5}
+                  color="white"
+                  anchorX="center"
+                  anchorY="middle"
+                  outlineWidth={0.05}
+                  outlineColor="#000000"
+                  maxWidth={3}
+                >
+                  {word}
+                </Text>
+              );
+            })}
+          </group>
         );
       })}
 

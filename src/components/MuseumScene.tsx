@@ -52,8 +52,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
   
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 2.5, 12));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 2.5, 12));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
@@ -267,8 +267,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         enableZoom={true}
         minDistance={0.1}
         maxDistance={15}
-        minPolarAngle={Math.PI * 0.3}
-        maxPolarAngle={Math.PI * 0.65}
+        minPolarAngle={Math.PI * 0.35}
+        maxPolarAngle={Math.PI * 0.55}
         rotateSpeed={responsive.isMobile ? 0.7 : 0.5}
         enableDamping
         dampingFactor={responsive.isMobile ? 0.08 : 0.06}
