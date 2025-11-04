@@ -212,15 +212,16 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
               return (
                 <Text
                   key={`word-${wordIndex}`}
-                  position={[x, 6.5, z]}
+                  position={[x, 5.5, z]}
                   rotation={[0, wordAngle + Math.PI, 0]}
-                  fontSize={0.5}
-                  color="white"
+                  fontSize={0.8}
+                  color="#2C3E50"
                   anchorX="center"
                   anchorY="middle"
-                  outlineWidth={0.05}
-                  outlineColor="#000000"
+                  outlineWidth={0.02}
+                  outlineColor="#FFFFFF"
                   maxWidth={3}
+                  letterSpacing={0.05}
                 >
                   {word}
                 </Text>
