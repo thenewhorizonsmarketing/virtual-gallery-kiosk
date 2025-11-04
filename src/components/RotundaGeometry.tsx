@@ -262,8 +262,6 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
             color="white"
             anchorX="center"
             anchorY="middle"
-            font="serif"
-            fontWeight={700}
             letterSpacing={0.05}
             outlineWidth={0.02}
             outlineColor="#000000"
