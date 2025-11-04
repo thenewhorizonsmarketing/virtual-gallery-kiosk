@@ -120,5 +120,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
   }
 }

@@ -1,7 +1,8 @@
-import { useRef, useMemo, useState, useEffect } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { useResponsive } from '@/hooks/useResponsive';
 
 interface MuseumSceneProps {
   onDoorClick: (key: string) => void;
@@ -18,21 +19,37 @@ const DOORS = [
   { key: 'Faculty & Staff', position: [3, 2, -2] as [number, number, number], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
 ];
 
+// Preload the GLTF model
+useGLTF.preload('/room_packshot.glb');
+
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
+  const responsive = useResponsive();
+  
   // Load the GLTF room model
   const { scene: gltfScene } = useGLTF('/room_packshot.glb');
   
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
   
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 8));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 8));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 0));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (particlesRef.current) {
+        particlesRef.current.geometry.dispose();
+        (particlesRef.current.material as THREE.Material).dispose();
+      }
+    };
+  }, []);
+
   const particlesGeometry = useMemo(() => {
-    const positions = new Float32Array(2000 * 3);
-    for (let i = 0; i < 2000; i++) {
+    const count = responsive.particleCount;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 24; // x
       positions[i * 3 + 1] = Math.random() * 6; // y - from floor to ceiling
       positions[i * 3 + 2] = (Math.random() - 0.5) * 24; // z
@@ -40,7 +57,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     return geometry;
-  }, []);
+  }, [responsive.particleCount]);
 
   // Handle camera zoom animations and particle movement
   useFrame((state, delta) => {
@@ -112,31 +129,40 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <pointLight position={[-3, 3, 3]} intensity={0.8} color="#FFF8F0" distance={15} decay={2} />
       <pointLight position={[3, 3, 3]} intensity={0.8} color="#FFF8F0" distance={15} decay={2} />
 
-      {/* GLTF Room Model - scaled and positioned */}
+      {/* GLTF Room Model - scaled dynamically based on device */}
       <primitive 
         object={gltfScene} 
-        scale={[2, 2, 2]} 
+        scale={responsive.modelScale} 
         position={[0, 0, 0]}
         rotation={[0, 0, 0]}
       />
 
-      {/* Invisible clickable door areas positioned over GLTF doors */}
+      {/* Invisible clickable door areas - larger on mobile */}
       {DOORS.map((door) => (
         <mesh
           key={door.key}
           position={door.position}
           rotation={door.rotation}
-          onClick={() => onDoorClick(door.key)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDoorClick(door.key);
+            // Haptic feedback on mobile
+            if (responsive.isMobile && 'vibrate' in navigator) {
+              navigator.vibrate(50);
+            }
+          }}
           onPointerOver={(e) => {
             e.stopPropagation();
-            document.body.style.cursor = 'pointer';
+            if (!responsive.isMobile) {
+              document.body.style.cursor = 'pointer';
+            }
           }}
           onPointerOut={(e) => {
             e.stopPropagation();
             document.body.style.cursor = 'default';
           }}
         >
-          <planeGeometry args={[2, 4]} />
+          <planeGeometry args={responsive.isMobile ? [2.5, 5] : [2, 4]} />
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       ))}
@@ -162,9 +188,9 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         maxDistance={12}
         minPolarAngle={Math.PI * 0.2}
         maxPolarAngle={Math.PI * 0.5}
-        rotateSpeed={0.5}
+        rotateSpeed={responsive.isMobile ? 0.7 : 0.5}
         enableDamping
-        dampingFactor={0.06}
+        dampingFactor={responsive.isMobile ? 0.08 : 0.06}
         makeDefault
       />
     </>
