@@ -6,44 +6,66 @@ interface RotundaGeometryProps {
   columnCount?: number;
 }
 
+// 4 doorway positions at cardinal directions
+const DOORWAY_ANGLES = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
+
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
-  // Calculate column positions in a circle
+  // Calculate column positions - 2 columns flanking each of 4 doorways (8 total)
   const columnPositions = useMemo(() => {
     const positions: Array<{ x: number; z: number; angle: number }> = [];
-    for (let i = 0; i < columnCount; i++) {
-      const angle = (i / columnCount) * Math.PI * 2;
+    
+    // Place 2 columns on each side of each doorway (8 columns total)
+    DOORWAY_ANGLES.forEach(doorAngle => {
+      // Column to the left of doorway
+      const leftAngle = doorAngle - DOORWAY_WIDTH / 2 - 0.2;
       positions.push({
-        x: Math.cos(angle) * (radius - 1),
-        z: Math.sin(angle) * (radius - 1),
-        angle,
+        x: Math.cos(leftAngle) * (radius - 1),
+        z: Math.sin(leftAngle) * (radius - 1),
+        angle: leftAngle,
       });
-    }
-    return positions;
-  }, [columnCount, radius]);
-
-  // Calculate arch positions between columns
-  const archPositions = useMemo(() => {
-    const positions: Array<{ x: number; z: number; angle: number }> = [];
-    for (let i = 0; i < columnCount; i++) {
-      const angle = ((i + 0.5) / columnCount) * Math.PI * 2;
+      
+      // Column to the right of doorway
+      const rightAngle = doorAngle + DOORWAY_WIDTH / 2 + 0.2;
       positions.push({
-        x: Math.cos(angle) * (radius - 1),
-        z: Math.sin(angle) * (radius - 1),
-        angle,
+        x: Math.cos(rightAngle) * (radius - 1),
+        z: Math.sin(rightAngle) * (radius - 1),
+        angle: rightAngle,
       });
-    }
+    });
+    
     return positions;
-  }, [columnCount, radius]);
-
-  // Calculate niche positions (4 main display areas)
-  const nichePositions = useMemo(() => {
-    return [
-      { angle: 0, x: Math.cos(0) * radius, z: Math.sin(0) * radius },
-      { angle: Math.PI / 2, x: Math.cos(Math.PI / 2) * radius, z: Math.sin(Math.PI / 2) * radius },
-      { angle: Math.PI, x: Math.cos(Math.PI) * radius, z: Math.sin(Math.PI) * radius },
-      { angle: Math.PI * 1.5, x: Math.cos(Math.PI * 1.5) * radius, z: Math.sin(Math.PI * 1.5) * radius },
-    ];
   }, [radius]);
+
+  // Calculate arch positions - arches connect adjacent columns within each section
+  const archPositions = useMemo(() => {
+    const positions: Array<{ 
+      x: number; 
+      z: number; 
+      angle: number;
+      col1: number;
+      col2: number;
+    }> = [];
+    
+    // Create arches between adjacent column pairs (4 arches total, one per section)
+    for (let i = 0; i < columnPositions.length - 1; i += 2) {
+      const col1 = columnPositions[i];
+      const col2 = columnPositions[i + 1];
+      
+      // Position arch midway between the two columns
+      const midAngle = (col1.angle + col2.angle) / 2;
+      positions.push({
+        x: Math.cos(midAngle) * (radius - 1),
+        z: Math.sin(midAngle) * (radius - 1),
+        angle: midAngle,
+        col1: i,
+        col2: i + 1,
+      });
+    }
+    
+    return positions;
+  }, [columnPositions, radius]);
+
 
   return (
     <group>
@@ -134,10 +156,10 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         </group>
       ))}
 
-      {/* Heavy arches between columns */}
+      {/* Arches connecting adjacent columns */}
       {archPositions.map((pos, i) => (
-        <group key={`arch-${i}`} position={[pos.x, 5.8, pos.z]} rotation={[0, pos.angle, 0]}>
-          <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+        <group key={`arch-${i}`} position={[pos.x, 5.8, pos.z]} rotation={[0, pos.angle + Math.PI / 2, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
             <torusGeometry args={[1.2, 0.25, 16, 32, Math.PI]} />
             <meshStandardMaterial 
               color="#C0C0C0"
@@ -147,38 +169,82 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         </group>
       ))}
 
-      {/* Outer wall behind columns */}
-      <mesh position={[0, 4, 0]}>
-        <cylinderGeometry args={[radius + 0.5, radius + 0.5, 8, 64, 1, true]} />
-        <meshStandardMaterial 
-          color="#E8E8E8"
-          roughness={0.7}
-          side={THREE.BackSide}
-        />
-      </mesh>
+      {/* Wall segments between doorways (with gaps for doorways) */}
+      {DOORWAY_ANGLES.map((doorAngle, i) => {
+        // Calculate wall segment angle span (between this door and next door)
+        const nextDoorAngle = DOORWAY_ANGLES[(i + 1) % DOORWAY_ANGLES.length];
+        const wallStartAngle = doorAngle + DOORWAY_WIDTH / 2;
+        let wallArcLength = nextDoorAngle - DOORWAY_WIDTH / 2 - wallStartAngle;
+        
+        // Handle wrap-around for the last segment
+        if (wallArcLength < 0) {
+          wallArcLength += Math.PI * 2;
+        }
+        
+        return (
+          <mesh 
+            key={`wall-segment-${i}`} 
+            position={[0, 4, 0]}
+            rotation={[0, wallStartAngle, 0]}
+          >
+            <cylinderGeometry 
+              args={[
+                radius + 0.5, 
+                radius + 0.5, 
+                8, 
+                16, 
+                1, 
+                true, 
+                0, 
+                wallArcLength
+              ]} 
+            />
+            <meshStandardMaterial 
+              color="#E8E8E8"
+              roughness={0.7}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        );
+      })}
 
-      {/* Wall niches (recessed alcoves) */}
-      {nichePositions.map((pos, i) => (
-        <group key={`niche-${i}`} position={[pos.x * 0.9, 2.5, pos.z * 0.9]} rotation={[0, -pos.angle, 0]}>
-          {/* Niche recess */}
-          <mesh position={[0, 0, -0.5]}>
-            <boxGeometry args={[2.5, 3.5, 1]} />
-            <meshStandardMaterial 
-              color="#D8D8D8"
-              roughness={0.6}
-            />
-          </mesh>
-          
-          {/* Niche pedestal */}
-          <mesh position={[0, -1.2, -0.3]} castShadow>
-            <boxGeometry args={[1, 0.8, 0.6]} />
-            <meshStandardMaterial 
-              color="#B8B8B8"
-              roughness={0.5}
-            />
-          </mesh>
-        </group>
-      ))}
+      {/* Door frames at each entrance */}
+      {DOORWAY_ANGLES.map((angle, i) => {
+        const x = Math.cos(angle) * (radius + 0.5);
+        const z = Math.sin(angle) * (radius + 0.5);
+        
+        return (
+          <group 
+            key={`doorway-${i}`} 
+            position={[x, 0, z]} 
+            rotation={[0, angle + Math.PI, 0]}
+          >
+            {/* Left door jamb */}
+            <mesh position={[-1.5, 2.5, 0]} castShadow>
+              <boxGeometry args={[0.3, 5, 0.5]} />
+              <meshStandardMaterial color="#C0C0C0" roughness={0.6} />
+            </mesh>
+            
+            {/* Right door jamb */}
+            <mesh position={[1.5, 2.5, 0]} castShadow>
+              <boxGeometry args={[0.3, 5, 0.5]} />
+              <meshStandardMaterial color="#C0C0C0" roughness={0.6} />
+            </mesh>
+            
+            {/* Door lintel (top beam) */}
+            <mesh position={[0, 5, 0]} castShadow>
+              <boxGeometry args={[3.3, 0.5, 0.5]} />
+              <meshStandardMaterial color="#B0B0B0" roughness={0.6} />
+            </mesh>
+            
+            {/* Door threshold (floor) */}
+            <mesh position={[0, 0.05, 0]}>
+              <boxGeometry args={[3, 0.1, 0.6]} />
+              <meshStandardMaterial color="#A0A0A0" roughness={0.8} />
+            </mesh>
+          </group>
+        );
+      })}
 
       {/* Dome ceiling */}
       <mesh position={[0, 8, 0]} rotation={[0, 0, 0]}>
