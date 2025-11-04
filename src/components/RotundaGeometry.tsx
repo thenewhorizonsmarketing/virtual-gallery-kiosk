@@ -198,7 +198,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
           <Text
             key={`doorway-title-${i}`}
             position={[x, 5.6, z]}
-            rotation={[0, angle + Math.PI, 0]}
+            rotation={[0, angle, 0]}
             fontSize={0.7}
             color="#2C3E50"
             anchorX="center"
