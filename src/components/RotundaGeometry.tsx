@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { useMemo } from 'react';
+import { Text } from '@react-three/drei';
 
 interface RotundaGeometryProps {
   radius?: number;
@@ -9,6 +10,7 @@ interface RotundaGeometryProps {
 // 4 doorway positions at cardinal directions
 const DOORWAY_ANGLES = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
 const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
+const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
   // Calculate column positions - 2 columns flanking each of 4 doorways (8 total)
@@ -243,6 +245,32 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
               <meshStandardMaterial color="#A0A0A0" roughness={0.8} />
             </mesh>
           </group>
+        );
+      })}
+
+      {/* Doorway title text */}
+      {DOORWAY_ANGLES.map((angle, i) => {
+        const x = Math.cos(angle) * (radius + 0.5);
+        const z = Math.sin(angle) * (radius + 0.5);
+        
+        return (
+          <Text
+            key={`doorway-title-${i}`}
+            position={[x, 5.8, z]}
+            rotation={[0, angle + Math.PI, 0]}
+            fontSize={0.6}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+            font="serif"
+            fontWeight={700}
+            letterSpacing={0.05}
+            outlineWidth={0.02}
+            outlineColor="#000000"
+            outlineOpacity={0.3}
+          >
+            {DOORWAY_TITLES[i]}
+          </Text>
         );
       })}
 
