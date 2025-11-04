@@ -31,8 +31,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const particlesRef = useRef<THREE.Points>(null);
   const { camera } = useThree();
   
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(0, 2, 8));
+  const targetCameraPos = useRef(new THREE.Vector3(0, 2, 8));
   const isAnimating = useRef(false);
   const hasNotifiedComplete = useRef(false);
 
@@ -182,10 +182,11 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       </points>
 
       <OrbitControls
+        target={[0, 2, 0]}
         enablePan={false}
         enableZoom={true}
-        minDistance={5}
-        maxDistance={12}
+        minDistance={6}
+        maxDistance={15}
         minPolarAngle={Math.PI * 0.2}
         maxPolarAngle={Math.PI * 0.5}
         rotateSpeed={responsive.isMobile ? 0.7 : 0.5}
