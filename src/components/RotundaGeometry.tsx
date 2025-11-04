@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { Text } from '@react-three/drei';
 
 interface RotundaGeometryProps {
@@ -13,6 +13,8 @@ const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
 const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
+  const textRefs = useRef<any[]>([]);
+  
   // Calculate column positions - only between doorways
   const columnPositions = useMemo(() => {
     const positions: Array<{ x: number; z: number; angle: number }> = [];
@@ -51,7 +53,16 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
     return positions;
   }, [radius]);
 
-
+  // Apply curveRadius to text elements via ref
+  useEffect(() => {
+    const textRadius = radius + 0.48;
+    textRefs.current.forEach((textRef) => {
+      if (textRef) {
+        textRef.curveRadius = -textRadius;
+        textRef.sync?.();
+      }
+    });
+  }, [radius]);
 
   return (
     <group>
@@ -187,31 +198,31 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       })}
 
 
-      {/* Doorway title text - positioned inside wall facing center */}
+      {/* Doorway title text - curved along the wall */}
       {DOORWAY_ANGLES.map((angle, i) => {
         const title = DOORWAY_TITLES[i];
-        const textRadius = radius - 0.5; // Position well inside the rotunda
-        const x = Math.cos(angle) * textRadius;
-        const z = Math.sin(angle) * textRadius;
+        const textRadius = radius + 0.48; // Just inside the inner wall
+        const arcLength = DOORWAY_WIDTH * textRadius * 0.9; // Stay within doorway
 
         return (
-          <Text
-            key={`doorway-title-${i}`}
-            position={[x, 5.6, z]}
-            rotation={[0, angle + Math.PI, 0]}
-            fontSize={1.2}
-            color="#2C3E50"
-            anchorX="center"
-            anchorY="middle"
-            textAlign="center"
-            maxWidth={4}
-            letterSpacing={0.05}
-            outlineWidth={0.03}
-            outlineColor="#FFFFFF"
-            depthOffset={-1}
-          >
-            {title}
-          </Text>
+          <group key={`doorway-title-${i}`} rotation={[0, angle, 0]} renderOrder={10}>
+            <Text
+              ref={(el) => (textRefs.current[i] = el)}
+              position={[0, 5.6, 0]}
+              fontSize={0.9}
+              color="#2C3E50"
+              anchorX="center"
+              anchorY="middle"
+              textAlign="center"
+              maxWidth={arcLength}
+              letterSpacing={0.03}
+              outlineWidth={0.02}
+              outlineColor="#FFFFFF"
+              depthOffset={-1}
+            >
+              {title}
+            </Text>
+          </group>
         );
       })}
 
