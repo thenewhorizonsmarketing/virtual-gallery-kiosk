@@ -30,29 +30,6 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
     return positions;
   }, [radius, columnCount]);
 
-  // Calculate arch positions - connect all adjacent columns
-  const archPositions = useMemo(() => {
-    const positions: Array<{ 
-      x: number; 
-      z: number; 
-      angle: number;
-    }> = [];
-    
-    // Create arches between all adjacent columns
-    for (let i = 0; i < columnPositions.length; i++) {
-      const col1 = columnPositions[i];
-      const col2 = columnPositions[(i + 1) % columnPositions.length];
-      
-      const midAngle = (col1.angle + col2.angle) / 2;
-      positions.push({
-        x: Math.cos(midAngle) * (radius - 1),
-        z: Math.sin(midAngle) * (radius - 1),
-        angle: midAngle,
-      });
-    }
-    
-    return positions;
-  }, [columnPositions, radius]);
 
 
   return (
@@ -112,8 +89,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         </mesh>
       </group>
 
-      {/* Columns with square plinths */}
-      {columnPositions.map((pos, i) => (
+      {/* Columns with square plinths - every other column */}
+      {columnPositions.filter((_, i) => i % 2 === 0).map((pos, i) => (
         <group key={`column-${i}`} position={[pos.x, 0, pos.z]}>
           {/* Square plinth base */}
           <mesh castShadow receiveShadow>
@@ -144,18 +121,6 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         </group>
       ))}
 
-      {/* Arches connecting adjacent columns */}
-      {archPositions.map((pos, i) => (
-        <group key={`arch-${i}`} position={[pos.x, 5.8, pos.z]} rotation={[0, pos.angle + Math.PI / 2, 0]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <torusGeometry args={[1.2, 0.25, 16, 32, Math.PI]} />
-            <meshStandardMaterial 
-              color="#C0C0C0"
-              roughness={0.7}
-            />
-          </mesh>
-        </group>
-      ))}
 
       {/* Wall segments between doorways (with gaps for doorways) */}
       {DOORWAY_ANGLES.map((doorAngle, i) => {
