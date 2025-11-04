@@ -37,7 +37,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       
       // Place columns evenly within this wall segment
       for (let j = 0; j < columnsPerSegment; j++) {
-        const angle = segmentStart + (segmentSpan * (j + 1) / (columnsPerSegment + 1));
+        const angle = segmentStart + (segmentSpan * (j + 0.5) / columnsPerSegment);
         const normalizedAngle = angle % (Math.PI * 2);
         
         positions.push({
