@@ -163,24 +163,39 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   return (
     <>
-      {/* Cool bluish key light from above */}
+      {/* Natural daylight from oculus */}
       <directionalLight
-        position={[8, 12, 5]}
-        intensity={2.5}
-        color="#B0C4DE"
+        position={[0, 15, 0]}
+        intensity={3.5}
+        color="#FFF5E1"
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-left={-15}
+        shadow-camera-right={15}
+        shadow-camera-top={15}
+        shadow-camera-bottom={-15}
+        shadow-camera-near={0.5}
+        shadow-camera-far={25}
+        shadow-bias={-0.0001}
       />
       
       {/* Warm fill lights around columns */}
-      <pointLight position={[-8, 4, 8]} intensity={0.7} color="#FFE4C4" distance={20} decay={2} />
-      <pointLight position={[8, 4, 8]} intensity={0.7} color="#FFE4C4" distance={20} decay={2} />
-      <pointLight position={[-8, 4, -8]} intensity={0.7} color="#FFE4C4" distance={20} decay={2} />
-      <pointLight position={[8, 4, -8]} intensity={0.7} color="#FFE4C4" distance={20} decay={2} />
+      <pointLight position={[-7, 3, 7]} intensity={0.4} color="#FFE4C4" distance={15} decay={2} />
+      <pointLight position={[7, 3, 7]} intensity={0.4} color="#FFE4C4" distance={15} decay={2} />
+      <pointLight position={[-7, 3, -7]} intensity={0.4} color="#FFE4C4" distance={15} decay={2} />
+      <pointLight position={[7, 3, -7]} intensity={0.4} color="#FFE4C4" distance={15} decay={2} />
       
       {/* Low ambient base light */}
-      <ambientLight intensity={0.3} color="#FFF8F0" />
+      <ambientLight intensity={0.15} color="#E8E8F0" />
+      
+      {/* Hemisphere light for natural sky dome effect */}
+      <hemisphereLight 
+        color="#E8F4FF"
+        groundColor="#8B7355"
+        intensity={0.5}
+        position={[0, 10, 0]}
+      />
       
       {/* Accent spotlights in niches */}
       {DOORS.map((door) => (
@@ -188,9 +203,9 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           key={`spotlight-${door.key}`}
           position={[door.position[0] * 0.7, 4, door.position[2] * 0.7]}
           target-position={door.position}
-          intensity={1.2}
-          angle={0.4}
-          penumbra={0.5}
+          intensity={0.8}
+          angle={0.5}
+          penumbra={0.7}
           color="#FFFFFF"
           distance={15}
           decay={2}

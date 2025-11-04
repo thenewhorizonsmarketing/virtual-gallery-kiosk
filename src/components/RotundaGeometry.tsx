@@ -60,8 +60,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         <circleGeometry args={[radius, 64]} />
         <meshStandardMaterial 
           color="#F5F5DC"
-          roughness={0.3}
-          metalness={0.1}
+          roughness={0.4}
+          metalness={0.05}
         />
       </mesh>
 
@@ -73,6 +73,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
             key={`radial-${i}`}
             rotation={[-Math.PI / 2, 0, angle]}
             position={[0, 0.01, 0]}
+            castShadow
           >
             <planeGeometry args={[0.1, radius * 2]} />
             <meshStandardMaterial 
@@ -89,6 +90,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
           key={`circle-${r}`}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 0.02, 0]}
+          castShadow
         >
           <ringGeometry args={[r - 0.05, r + 0.05, 64]} />
           <meshStandardMaterial 
@@ -104,8 +106,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
           <cylinderGeometry args={[3, 3.2, 0.3, 32]} />
           <meshStandardMaterial 
             color="#FFFFFF"
-            roughness={0.2}
-            metalness={0.2}
+            roughness={0.3}
+            metalness={0.1}
           />
         </mesh>
       </group>
@@ -160,6 +162,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
             key={`wall-segment-${i}`} 
             position={[0, 4, 0]}
             rotation={[0, wallStartAngle, 0]}
+            castShadow
+            receiveShadow
           >
             <cylinderGeometry 
               args={[
@@ -206,7 +210,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       })}
 
       {/* Dome ceiling */}
-      <mesh position={[0, 8, 0]} rotation={[0, 0, 0]}>
+      <mesh position={[0, 8, 0]} rotation={[0, 0, 0]} receiveShadow>
         <sphereGeometry args={[radius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
         <meshStandardMaterial 
           color="#F0F0F0"
@@ -216,7 +220,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       </mesh>
 
       {/* Oculus (circular skylight at top) */}
-      <mesh position={[0, 8.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 8.5, 0]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
         <ringGeometry args={[1.8, 2, 32]} />
         <meshStandardMaterial 
           color="#8B7355"
