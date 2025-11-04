@@ -19,16 +19,16 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
     
     // Place 2 columns on each side of each doorway (8 columns total)
     DOORWAY_ANGLES.forEach(doorAngle => {
-      // Column to the left of doorway
-      const leftAngle = doorAngle - DOORWAY_WIDTH / 2 - 0.2;
+      // Column to the left of doorway - positioned further away for clear opening
+      const leftAngle = doorAngle - DOORWAY_WIDTH - 0.3;
       positions.push({
         x: Math.cos(leftAngle) * (radius - 1),
         z: Math.sin(leftAngle) * (radius - 1),
         angle: leftAngle,
       });
       
-      // Column to the right of doorway
-      const rightAngle = doorAngle + DOORWAY_WIDTH / 2 + 0.2;
+      // Column to the right of doorway - positioned further away for clear opening
+      const rightAngle = doorAngle + DOORWAY_WIDTH + 0.3;
       positions.push({
         x: Math.cos(rightAngle) * (radius - 1),
         z: Math.sin(rightAngle) * (radius - 1),
@@ -248,27 +248,35 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         );
       })}
 
-      {/* Doorway title text */}
+      {/* Doorway title text with background plates */}
       {DOORWAY_ANGLES.map((angle, i) => {
         const x = Math.cos(angle) * (radius + 0.5);
         const z = Math.sin(angle) * (radius + 0.5);
         
         return (
-          <Text
-            key={`doorway-title-${i}`}
-            position={[x, 5.8, z]}
-            rotation={[0, angle + Math.PI, 0]}
-            fontSize={0.6}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-            letterSpacing={0.05}
-            outlineWidth={0.02}
-            outlineColor="#000000"
-            outlineOpacity={0.3}
-          >
-            {DOORWAY_TITLES[i]}
-          </Text>
+          <group key={`doorway-title-group-${i}`}>
+            {/* Dark background plate for contrast */}
+            <mesh position={[x * 1.08, 5.8, z * 1.08]} rotation={[0, angle + Math.PI, 0]}>
+              <planeGeometry args={[3.5, 1]} />
+              <meshStandardMaterial color="#1a1a1a" opacity={0.7} transparent />
+            </mesh>
+            
+            {/* Title text - positioned forward from wall */}
+            <Text
+              position={[x * 1.08, 5.8, z * 1.08]}
+              rotation={[0, angle + Math.PI, 0]}
+              fontSize={0.8}
+              color="white"
+              anchorX="center"
+              anchorY="middle"
+              letterSpacing={0.05}
+              outlineWidth={0.05}
+              outlineColor="#000000"
+              outlineOpacity={0.8}
+            >
+              {DOORWAY_TITLES[i]}
+            </Text>
+          </group>
         );
       })}
 

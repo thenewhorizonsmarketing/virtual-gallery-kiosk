@@ -49,6 +49,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const responsive = useResponsive();
   
   const particlesRef = useRef<THREE.Points>(null);
+  const controlsRef = useRef<any>(null);
   const { camera } = useThree();
   
   const initialCameraPos = useRef(new THREE.Vector3(0, 2, 0));
@@ -122,6 +123,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         isAnimating.current = false;
         // Update target to current position to prevent snapping back
         targetCameraPos.current.copy(camera.position);
+        // Force controls to update and re-enable
+        if (controlsRef.current) {
+          controlsRef.current.update();
+        }
         if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
           hasNotifiedComplete.current = true;
           onZoomComplete(selectedRoom);
@@ -240,6 +245,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       </points>
 
       <OrbitControls
+        ref={controlsRef}
+        enabled={!isAnimating.current}
         target={[0, 2.5, 0]}
         enablePan={false}
         enableZoom={true}
