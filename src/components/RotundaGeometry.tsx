@@ -187,47 +187,29 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       })}
 
 
-      {/* Doorway title text - curved around doorways */}
+      {/* Doorway title text - positioned to face center */}
       {DOORWAY_ANGLES.map((angle, i) => {
         const title = DOORWAY_TITLES[i];
-        const words = title.split(' ');
-        const totalWords = words.length;
-        
-        // Calculate angular spread for text (slightly less than doorway width)
-        const textSpread = DOORWAY_WIDTH * 0.7; // 70% of doorway width
-        const anglePerWord = textSpread / Math.max(1, totalWords - 1);
-        const startAngle = angle - textSpread / 2;
+        const textRadius = radius + 0.55; // Just inside the wall
+        const x = Math.cos(angle) * textRadius;
+        const z = Math.sin(angle) * textRadius;
         
         return (
-          <group key={`doorway-title-${i}`}>
-            {words.map((word, wordIndex) => {
-              const wordAngle = totalWords === 1 
-                ? angle 
-                : startAngle + (anglePerWord * wordIndex);
-              
-              const textRadius = radius + 1.2;
-              const x = Math.cos(wordAngle) * textRadius;
-              const z = Math.sin(wordAngle) * textRadius;
-              
-              return (
-                <Text
-                  key={`word-${wordIndex}`}
-                  position={[x, 5.5, z]}
-                  rotation={[0, wordAngle + Math.PI, 0]}
-                  fontSize={0.8}
-                  color="#2C3E50"
-                  anchorX="center"
-                  anchorY="middle"
-                  outlineWidth={0.02}
-                  outlineColor="#FFFFFF"
-                  maxWidth={3}
-                  letterSpacing={0.05}
-                >
-                  {word}
-                </Text>
-              );
-            })}
-          </group>
+          <Text
+            key={`doorway-title-${i}`}
+            position={[x, 5.6, z]}
+            rotation={[0, angle + Math.PI, 0]}
+            fontSize={0.7}
+            color="#2C3E50"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.02}
+            outlineColor="#FFFFFF"
+            letterSpacing={0.05}
+            maxWidth={3}
+          >
+            {title}
+          </Text>
         );
       })}
 
