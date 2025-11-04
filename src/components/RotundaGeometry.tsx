@@ -13,55 +13,41 @@ const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
 const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
-  // Calculate column positions - 2 columns flanking each of 4 doorways (8 total)
+  // Calculate column positions - evenly spaced around the rotunda
   const columnPositions = useMemo(() => {
     const positions: Array<{ x: number; z: number; angle: number }> = [];
     
-    // Place 2 columns on each side of each doorway (8 columns total)
-    DOORWAY_ANGLES.forEach(doorAngle => {
-      // Column to the left of doorway - positioned further away for clear opening
-      const leftAngle = doorAngle - DOORWAY_WIDTH - 0.3;
+    // Evenly space columns around the rotunda
+    for (let i = 0; i < columnCount; i++) {
+      const angle = (i / columnCount) * Math.PI * 2;
       positions.push({
-        x: Math.cos(leftAngle) * (radius - 1),
-        z: Math.sin(leftAngle) * (radius - 1),
-        angle: leftAngle,
+        x: Math.cos(angle) * (radius - 1),
+        z: Math.sin(angle) * (radius - 1),
+        angle: angle,
       });
-      
-      // Column to the right of doorway - positioned further away for clear opening
-      const rightAngle = doorAngle + DOORWAY_WIDTH + 0.3;
-      positions.push({
-        x: Math.cos(rightAngle) * (radius - 1),
-        z: Math.sin(rightAngle) * (radius - 1),
-        angle: rightAngle,
-      });
-    });
+    }
     
     return positions;
-  }, [radius]);
+  }, [radius, columnCount]);
 
-  // Calculate arch positions - arches connect adjacent columns within each section
+  // Calculate arch positions - connect all adjacent columns
   const archPositions = useMemo(() => {
     const positions: Array<{ 
       x: number; 
       z: number; 
       angle: number;
-      col1: number;
-      col2: number;
     }> = [];
     
-    // Create arches between adjacent column pairs (4 arches total, one per section)
-    for (let i = 0; i < columnPositions.length - 1; i += 2) {
+    // Create arches between all adjacent columns
+    for (let i = 0; i < columnPositions.length; i++) {
       const col1 = columnPositions[i];
-      const col2 = columnPositions[i + 1];
+      const col2 = columnPositions[(i + 1) % columnPositions.length];
       
-      // Position arch midway between the two columns
       const midAngle = (col1.angle + col2.angle) / 2;
       positions.push({
         x: Math.cos(midAngle) * (radius - 1),
         z: Math.sin(midAngle) * (radius - 1),
         angle: midAngle,
-        col1: i,
-        col2: i + 1,
       });
     }
     
@@ -210,73 +196,26 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         );
       })}
 
-      {/* Door frames at each entrance */}
-      {DOORWAY_ANGLES.map((angle, i) => {
-        const x = Math.cos(angle) * (radius + 0.5);
-        const z = Math.sin(angle) * (radius + 0.5);
-        
-        return (
-          <group 
-            key={`doorway-${i}`} 
-            position={[x, 0, z]} 
-            rotation={[0, angle + Math.PI, 0]}
-          >
-            {/* Left door jamb */}
-            <mesh position={[-1.5, 2.5, 0]} castShadow>
-              <boxGeometry args={[0.3, 5, 0.5]} />
-              <meshStandardMaterial color="#C0C0C0" roughness={0.6} />
-            </mesh>
-            
-            {/* Right door jamb */}
-            <mesh position={[1.5, 2.5, 0]} castShadow>
-              <boxGeometry args={[0.3, 5, 0.5]} />
-              <meshStandardMaterial color="#C0C0C0" roughness={0.6} />
-            </mesh>
-            
-            {/* Door lintel (top beam) */}
-            <mesh position={[0, 5, 0]} castShadow>
-              <boxGeometry args={[3.3, 0.5, 0.5]} />
-              <meshStandardMaterial color="#B0B0B0" roughness={0.6} />
-            </mesh>
-            
-            {/* Door threshold (floor) */}
-            <mesh position={[0, 0.05, 0]}>
-              <boxGeometry args={[3, 0.1, 0.6]} />
-              <meshStandardMaterial color="#A0A0A0" roughness={0.8} />
-            </mesh>
-          </group>
-        );
-      })}
 
-      {/* Doorway title text with background plates */}
+      {/* Doorway title text */}
       {DOORWAY_ANGLES.map((angle, i) => {
         const x = Math.cos(angle) * (radius + 0.5);
         const z = Math.sin(angle) * (radius + 0.5);
         
         return (
-          <group key={`doorway-title-group-${i}`}>
-            {/* Dark background plate for contrast */}
-            <mesh position={[x * 1.08, 5.8, z * 1.08]} rotation={[0, angle + Math.PI, 0]}>
-              <planeGeometry args={[3.5, 1]} />
-              <meshStandardMaterial color="#1a1a1a" opacity={0.7} transparent />
-            </mesh>
-            
-            {/* Title text - positioned forward from wall */}
-            <Text
-              position={[x * 1.08, 5.8, z * 1.08]}
-              rotation={[0, angle + Math.PI, 0]}
-              fontSize={0.8}
-              color="white"
-              anchorX="center"
-              anchorY="middle"
-              letterSpacing={0.05}
-              outlineWidth={0.05}
-              outlineColor="#000000"
-              outlineOpacity={0.8}
-            >
-              {DOORWAY_TITLES[i]}
-            </Text>
-          </group>
+          <Text
+            key={`doorway-title-${i}`}
+            position={[x * 1.15, 5.8, z * 1.15]}
+            rotation={[0, angle + Math.PI, 0]}
+            fontSize={1.2}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.08}
+            outlineColor="#000000"
+          >
+            {DOORWAY_TITLES[i]}
+          </Text>
         );
       })}
 
