@@ -47,8 +47,9 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 
 const Index = () => {
   const responsive = useResponsive();
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const defaultRoom = 'Historical Photos/Archives';
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(defaultRoom);
+  const [activeRoom, setActiveRoom] = useState<string | null>(defaultRoom);
   const [showRoomPanel, setShowRoomPanel] = useState(false);
   const [year] = useState(new Date().getFullYear());
   const [cameraKey, setCameraKey] = useState(0);
@@ -72,8 +73,8 @@ const Index = () => {
   };
 
   const handleResetCamera = () => {
-    setSelectedRoom(null);
-    setActiveRoom(null);
+    setSelectedRoom(defaultRoom);
+    setActiveRoom(defaultRoom);
     setShowRoomPanel(false);
     setCameraKey(prev => prev + 1); // Force camera reset by remounting Canvas
   };
