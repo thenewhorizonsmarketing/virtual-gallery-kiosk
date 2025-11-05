@@ -230,6 +230,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
               outlineWidth={0.02}
               outlineColor="#FFFFFF"
               depthOffset={-1}
+              curveRadius={-textRadius}
             >
               {title}
             </Text>
