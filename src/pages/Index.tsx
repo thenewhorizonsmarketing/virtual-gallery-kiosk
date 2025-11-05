@@ -155,7 +155,7 @@ const Index = () => {
           <div style={{ display: activeRoom ? 'none' : 'block', width: '100%', height: '100%' }}>
             <Canvas
               key={cameraKey}
-              camera={{ position: [-0.1, 2.5, 0], near: 0.01, far: 60, fov: responsive.cameraFOV }}
+              camera={{ position: [-2.6, 2.8, 5.2], near: 0.01, far: 60, fov: responsive.cameraFOV }}
               shadows
               gl={{ 
                 antialias: !responsive.isMobile, 

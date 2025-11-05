@@ -52,11 +52,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
 
-  const initialCameraPos = useRef(new THREE.Vector3(-0.1, 2.5, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(-2.6, 2.8, 5.2));
+  const initialLookTarget = useRef(new THREE.Vector3(-0.6, 2.5, 0.4));
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
-  const animationLookTarget = useRef(new THREE.Vector3(0, 2.5, 0));
+  const animationLookTarget = useRef(initialLookTarget.current.clone());
   const isAnimatingRef = useRef(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const hasNotifiedComplete = useRef(false);
@@ -70,6 +71,16 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       }
     };
   }, []);
+
+  useEffect(() => {
+    camera.position.copy(initialCameraPos.current);
+    camera.lookAt(initialLookTarget.current);
+
+    if (controlsRef.current) {
+      controlsRef.current.target.copy(initialLookTarget.current);
+      controlsRef.current.update();
+    }
+  }, [camera]);
 
   const particlesGeometry = useMemo(() => {
     const count = responsive.particleCount;
@@ -194,7 +205,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const start = camera.position.clone();
         const mid = start.clone().lerp(initialCameraPos.current, 0.5).add(new THREE.Vector3(0, 0.6, 0));
         const points = [start, mid, initialCameraPos.current.clone()];
-        const lookTarget = new THREE.Vector3(0, 2.5, 0);
+        const lookTarget = initialLookTarget.current.clone();
 
         startAnimation(points, lookTarget, responsive.isMobile ? 2.6 : 2.2);
         hasNotifiedComplete.current = false;
@@ -303,7 +314,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={[0, 2.5, 0]}
+        target={[initialLookTarget.current.x, initialLookTarget.current.y, initialLookTarget.current.z]}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
