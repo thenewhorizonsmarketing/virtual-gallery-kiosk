@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrbitControls } from '@react-three/drei';
 import { useResponsive } from '@/hooks/useResponsive';
+import { DOORWAYS, type Doorway } from '@/data/doorways';
 
 const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string; description: string }> }> = {
   'Alumni/Class Composites': {
@@ -47,6 +48,7 @@ const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string
 
 const Index = () => {
   const responsive = useResponsive();
+  const [selectedDoor, setSelectedDoor] = useState<Doorway | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [showRoomPanel, setShowRoomPanel] = useState(false);
@@ -54,13 +56,15 @@ const Index = () => {
   const [cameraKey, setCameraKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleDoorClick = (roomKey: string) => {
-    setSelectedRoom(roomKey);
+  const handleDoorClick = (door: Doorway) => {
+    setSelectedDoor(door);
+    setSelectedRoom(door.key);
     setActiveRoom(null);
     setShowRoomPanel(false); // Hide panel during transition
   };
 
   const handleCloseRoom = () => {
+    setSelectedDoor(null);
     setSelectedRoom(null);
     setActiveRoom(null);
     setShowRoomPanel(false);
@@ -72,6 +76,7 @@ const Index = () => {
   };
 
   const handleResetCamera = () => {
+    setSelectedDoor(null);
     setSelectedRoom(null);
     setActiveRoom(null);
     setShowRoomPanel(false);
@@ -211,13 +216,26 @@ const Index = () => {
 
         {/* Overlay controls */}
         <div className="pointer-events-none absolute inset-0 z-[2]">
-          <div className="flex gap-2 p-2 md:p-3">
+          <div className="flex flex-wrap items-center gap-2 p-2 md:p-3">
             <Button
               onClick={handleResetCamera}
               className="pointer-events-auto bg-accent px-3 py-2 text-sm font-black text-accent-foreground shadow-[0_10px_24px_rgba(0,0,0,0.35)] hover:bg-accent/90 md:px-4 md:text-base"
             >
               Reset View
             </Button>
+            {DOORWAYS.map((door) => (
+              <Button
+                key={door.key}
+                asChild
+                size="sm"
+                variant="secondary"
+                className="pointer-events-auto bg-primary/40 text-primary-foreground shadow-[0_6px_18px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-colors hover:bg-primary/55"
+              >
+                <a href={door.link} target="_blank" rel="noreferrer">
+                  {door.shortTitle} ↗
+                </a>
+              </Button>
+            ))}
           </div>
 
           {/* Hint text */}
@@ -247,6 +265,18 @@ const Index = () => {
                 <CardTitle className="flex-1 text-lg font-black tracking-tight md:text-2xl">
                   {responsive.isMobile ? roomData.title.split('(')[0].trim() : roomData.title}
                 </CardTitle>
+                {selectedDoor && (
+                  <Button
+                    asChild
+                    variant="secondary"
+                    size="sm"
+                    className="pointer-events-auto bg-white/15 text-primary-foreground hover:bg-white/25"
+                  >
+                    <a href={selectedDoor.link} target="_blank" rel="noreferrer">
+                      Visit {selectedDoor.shortTitle} ↗
+                    </a>
+                  </Button>
+                )}
                 <Button
                   onClick={handleCloseRoom}
                   className="bg-accent px-3 py-2 text-sm font-black text-accent-foreground hover:bg-accent/90 md:px-4 md:text-base"

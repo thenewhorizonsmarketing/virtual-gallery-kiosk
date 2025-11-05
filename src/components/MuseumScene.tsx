@@ -4,9 +4,10 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useResponsive } from '@/hooks/useResponsive';
 import { RotundaGeometry } from './RotundaGeometry';
+import { DOORWAYS, type Doorway } from '@/data/doorways';
 
 interface MuseumSceneProps {
-  onDoorClick: (key: string) => void;
+  onDoorClick: (door: Doorway) => void;
   onResetCamera?: () => void;
   selectedRoom?: string | null;
   onZoomComplete?: (roomKey: string) => void;
@@ -21,29 +22,12 @@ const calculateNichePosition = (angle: number, radius: number = 9): [number, num
   ];
 };
 
-// Niche positions for clickable areas (4 main display niches in rotunda)
-const DOORS = [
-  { 
-    key: 'Alumni/Class Composites', 
-    position: calculateNichePosition(0), 
-    rotation: [0, Math.PI, 0] as [number, number, number] 
-  },
-  { 
-    key: 'Publications (Amicus, Legal Eye, Law Review, Directory)', 
-    position: calculateNichePosition(Math.PI / 2), 
-    rotation: [0, -Math.PI / 2, 0] as [number, number, number] 
-  },
-  { 
-    key: 'Historical Photos/Archives', 
-    position: calculateNichePosition(Math.PI), 
-    rotation: [0, 0, 0] as [number, number, number] 
-  },
-  { 
-    key: 'Faculty & Staff', 
-    position: calculateNichePosition(Math.PI * 1.5), 
-    rotation: [0, Math.PI / 2, 0] as [number, number, number] 
-  },
-];
+// Augment doorway metadata with positions and rotations for 3D interaction
+const DOORS = DOORWAYS.map((door) => ({
+  ...door,
+  position: calculateNichePosition(door.angle),
+  rotation: [0, (door.angle + Math.PI) % (Math.PI * 2), 0] as [number, number, number],
+}));
 
 export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
   const responsive = useResponsive();
@@ -275,7 +259,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           rotation={door.rotation}
           onClick={(e) => {
             e.stopPropagation();
-            onDoorClick(door.key);
+            onDoorClick(door);
             // Haptic feedback on mobile
             if (responsive.isMobile && 'vibrate' in navigator) {
               navigator.vibrate(50);
@@ -292,7 +276,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
             document.body.style.cursor = 'default';
           }}
         >
-          <planeGeometry args={responsive.isMobile ? [3.2, 6.8] : [2.6, 6]} />
+          <planeGeometry args={responsive.isMobile ? [3.6, 7.2] : [3.1, 6.4]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} depthTest={false} />
         </mesh>
       ))}
