@@ -38,8 +38,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera, gl, scene } = useThree();
 
-  const initialCameraPos = useRef(new THREE.Vector3(-2.6, 2.8, 5.2));
-  const initialLookTarget = useRef(new THREE.Vector3(-0.6, 2.5, 0.4));
+  const initialCameraPos = useRef(new THREE.Vector3(6, 2.5, 0));
+  const initialLookTarget = useRef(new THREE.Vector3(-9, 2.5, 0));
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
@@ -194,19 +194,30 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const thresholdDistance = 9.5;
         const exitDistance = 12;
 
-        const approachPoint = doorDirection.clone().multiplyScalar(approachDistance).add(new THREE.Vector3(0, 2.4, 0));
-        const doorwayPoint = doorDirection.clone().multiplyScalar(thresholdDistance).add(new THREE.Vector3(0, 2.2, 0));
-        const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.1, 0));
+        const approachPoint = doorDirection.clone().multiplyScalar(approachDistance).add(new THREE.Vector3(0, 2.5, 0));
+        const doorwayPoint = doorDirection.clone().multiplyScalar(thresholdDistance).add(new THREE.Vector3(0, 2.5, 0));
+        const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.5, 0));
 
-        const points = [
-          start.clone(),
-          start.clone().add(liftOffset),
-          approachPoint,
-          doorwayPoint,
-          exitPoint,
-        ];
+        const horizontalDistanceFromCenter = Math.hypot(start.x, start.z);
+        const isNearCenter = horizontalDistanceFromCenter < 6;
 
-        const lookTarget = doorDirection.clone().multiplyScalar(exitDistance + 2).add(new THREE.Vector3(0, 2.2, 0));
+        const points = isNearCenter
+          ? [
+              start.clone(),
+              start.clone().add(liftOffset),
+              approachPoint,
+              doorwayPoint,
+              exitPoint,
+            ]
+          : [
+              start.clone(),
+              new THREE.Vector3(0, 2.8, 0),
+              approachPoint,
+              doorwayPoint,
+              exitPoint,
+            ];
+
+        const lookTarget = doorDirection.clone().multiplyScalar(exitDistance + 2).add(new THREE.Vector3(0, 2.5, 0));
 
         startAnimation(points, lookTarget, responsive.isMobile ? 3.8 : 3.2);
         hasNotifiedComplete.current = false;
@@ -296,7 +307,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={[initialLookTarget.current.x, initialLookTarget.current.y, initialLookTarget.current.z]}
+        target={[-9, 2.5, 0]}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
