@@ -29,7 +29,7 @@ const DOOR_NAME_LOOKUP: Partial<Record<DoorKey, string>> = {
 function calculateDoorPosition(angle: number, radius: number = DOOR_RADIUS) {
   return new THREE.Vector3(
     Math.cos(angle) * radius,
-    3.2,
+    2.5,
     Math.sin(angle) * radius,
   );
 }

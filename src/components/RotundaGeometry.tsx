@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Text } from '@react-three/drei';
 import { DOORWAYS } from '@/data/doorways';
 
@@ -11,6 +11,45 @@ interface RotundaGeometryProps {
 // 4 doorway positions at cardinal directions (sourced from shared doorway config)
 const DOORWAY_ANGLES = DOORWAYS.map((door) => door.angle);
 const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
+
+interface DoorwayLabelTextProps {
+  title: string;
+  textRadius: number;
+  arcLength: number;
+}
+
+function DoorwayLabelText({ title, textRadius, arcLength }: DoorwayLabelTextProps) {
+  const textRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (textRef.current) {
+      textRef.current.curveRadius = -textRadius;
+      textRef.current.sync?.();
+    }
+  }, [textRadius]);
+
+  return (
+    <Text
+      ref={textRef}
+      position={[textRadius, 5.6, 0]}
+      rotation={[0, -Math.PI / 2, 0]}
+      fontSize={0.9}
+      color="#2C3E50"
+      anchorX="center"
+      anchorY="middle"
+      textAlign="center"
+      maxWidth={arcLength}
+      letterSpacing={0.03}
+      outlineWidth={0.02}
+      outlineColor="#FFFFFF"
+      depthOffset={-1}
+      name={`door-label-text-${title.toLowerCase()}`}
+      userData={{ doorKey: title, text: title }}
+    >
+      {title}
+    </Text>
+  );
+}
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
   // Calculate column positions - only between doorways
@@ -224,25 +263,11 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
             renderOrder={10}
             userData={{ doorKey: title }}
           >
-            <Text
-              position={[textRadius, 5.6, 0]}
-              rotation={[0, -Math.PI / 2, 0]}
-              fontSize={0.9}
-              color="#2C3E50"
-              anchorX="center"
-              anchorY="middle"
-              textAlign="center"
-              maxWidth={arcLength}
-              letterSpacing={0.03}
-              outlineWidth={0.02}
-              outlineColor="#FFFFFF"
-              depthOffset={-1}
-              curveRadius={-textRadius}
-              name={`door-label-text-${title.toLowerCase()}`}
-              userData={{ doorKey: title, text: title }}
-            >
-              {title}
-            </Text>
+            <DoorwayLabelText
+              title={title}
+              textRadius={textRadius}
+              arcLength={arcLength}
+            />
           </group>
         );
       })}
