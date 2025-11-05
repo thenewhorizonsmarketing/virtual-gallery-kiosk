@@ -52,7 +52,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
 
-  const initialCameraPos = useRef(new THREE.Vector3(0, 2.5, 0.01));
+  const initialCameraPos = useRef(new THREE.Vector3(-0.1, 2.5, 0));
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
