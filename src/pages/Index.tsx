@@ -54,14 +54,18 @@ const Index = () => {
   };
   
   const handleZoomComplete = useCallback((roomKey: string) => {
+    const door = DOORWAYS.find((entry) => entry.key === roomKey);
+    if (door) {
+      setSelectedDoor(door);
+    }
+    setActiveRoom(roomKey);
+    setShowRoomPanel(true);
+
     let path = queuedPath;
-    if (!path) {
-      const fallbackDoor = DOORWAYS.find((door) => door.key === roomKey);
-      if (fallbackDoor) {
-        const fallbackKey = fallbackDoor.shortTitle as DoorKey;
-        if (fallbackKey && DOOR_LINKS[fallbackKey]) {
-          path = DOOR_LINKS[fallbackKey];
-        }
+    if (!path && door) {
+      const fallbackKey = door.shortTitle as DoorKey;
+      if (fallbackKey && DOOR_LINKS[fallbackKey]) {
+        path = DOOR_LINKS[fallbackKey];
       }
     }
 
