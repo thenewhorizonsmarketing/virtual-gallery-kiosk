@@ -1,16 +1,16 @@
 import * as THREE from 'three';
 import { useMemo } from 'react';
 import { Text } from '@react-three/drei';
+import { DOORWAYS } from '@/data/doorways';
 
 interface RotundaGeometryProps {
   radius?: number;
   columnCount?: number;
 }
 
-// 4 doorway positions at cardinal directions
-const DOORWAY_ANGLES = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+// 4 doorway positions at cardinal directions (sourced from shared doorway config)
+const DOORWAY_ANGLES = DOORWAYS.map((door) => door.angle);
 const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
-const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
   // Calculate column positions - only between doorways
@@ -210,8 +210,9 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
 
 
       {/* Doorway title text - curved along the wall */}
-      {DOORWAY_ANGLES.map((angle, i) => {
-        const title = DOORWAY_TITLES[i];
+      {DOORWAYS.map((door, i) => {
+        const angle = door.angle;
+        const title = door.shortTitle;
         const textRadius = radius + 0.48; // Just inside the inner wall
         const arcLength = DOORWAY_WIDTH * textRadius * 0.9; // Stay within doorway
 
