@@ -21,7 +21,7 @@ export const DOORWAYS: Doorway[] = [
     title: 'Publications',
     shortTitle: 'Publications',
     description: 'Student and faculty publications, journals, and newsletters',
-    angle: Math.PI / 2,
+    angle: (Math.PI * 3) / 2,
     link: 'https://law.mc.edu/publications/',
   },
   {
@@ -37,7 +37,7 @@ export const DOORWAYS: Doorway[] = [
     title: 'Faculty & Staff',
     shortTitle: 'Faculty',
     description: 'Profiles and contact information for MC Law faculty and staff',
-    angle: (Math.PI * 3) / 2,
+    angle: Math.PI / 2,
     link: 'https://law.mc.edu/faculty/',
   },
 ];
