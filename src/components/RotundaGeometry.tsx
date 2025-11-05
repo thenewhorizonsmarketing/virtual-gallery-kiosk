@@ -217,7 +217,13 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         const arcLength = DOORWAY_WIDTH * textRadius * 0.9; // Stay within doorway
 
         return (
-          <group key={`doorway-title-${i}`} rotation={[0, angle, 0]} renderOrder={10}>
+          <group
+            key={`doorway-title-${i}`}
+            name={`door-label-${title.toLowerCase()}`}
+            rotation={[0, angle, 0]}
+            renderOrder={10}
+            userData={{ doorKey: title }}
+          >
             <Text
               position={[textRadius, 5.6, 0]}
               rotation={[0, -Math.PI / 2, 0]}
@@ -232,6 +238,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
               outlineColor="#FFFFFF"
               depthOffset={-1}
               curveRadius={-textRadius}
+              name={`door-label-text-${title.toLowerCase()}`}
+              userData={{ doorKey: title, text: title }}
             >
               {title}
             </Text>

@@ -5,12 +5,14 @@ import * as THREE from 'three';
 import { useResponsive } from '@/hooks/useResponsive';
 import { RotundaGeometry } from './RotundaGeometry';
 import { DOORWAYS, type Doorway } from '@/data/doorways';
+import { enableDoorwayInteractions } from '@/lib/scene/doorways';
 
 interface MuseumSceneProps {
   onDoorClick: (door: Doorway) => void;
   onResetCamera?: () => void;
   selectedRoom?: string | null;
   onZoomComplete?: (roomKey: string) => void;
+  navigateToPath?: (path: string) => void;
 }
 
 // Helper function to calculate niche positions in rotunda
@@ -29,12 +31,12 @@ const DOORS = DOORWAYS.map((door) => ({
   rotation: [0, (door.angle + Math.PI) % (Math.PI * 2), 0] as [number, number, number],
 }));
 
-export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete }: MuseumSceneProps) {
+export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomComplete, navigateToPath }: MuseumSceneProps) {
   const responsive = useResponsive();
-  
+
   const particlesRef = useRef<THREE.Points>(null);
   const controlsRef = useRef<any>(null);
-  const { camera } = useThree();
+  const { camera, gl, scene } = useThree();
 
   const initialCameraPos = useRef(new THREE.Vector3(-2.6, 2.8, 5.2));
   const initialLookTarget = useRef(new THREE.Vector3(-0.6, 2.5, 0.4));
@@ -65,6 +67,32 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       controlsRef.current.update();
     }
   }, [camera]);
+
+  useEffect(() => {
+    if (!gl?.domElement || !scene) {
+      return;
+    }
+
+    const cleanup = enableDoorwayInteractions({
+      canvas: gl.domElement,
+      sceneRoot: scene,
+      camera,
+      navigate: navigateToPath,
+      onDoorActivated: (doorKey) => {
+        const door = DOORWAYS.find((entry) => entry.shortTitle.toLowerCase() === doorKey.toLowerCase());
+        if (door) {
+          onDoorClick(door);
+          if (responsive.isMobile && 'vibrate' in navigator) {
+            navigator.vibrate(50);
+          }
+        }
+      },
+    });
+
+    return () => {
+      cleanup?.();
+    };
+  }, [camera, gl, scene, navigateToPath, onDoorClick, responsive.isMobile]);
 
   const particlesGeometry = useMemo(() => {
     const count = responsive.particleCount;
@@ -250,36 +278,6 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
       {/* Procedural Rotunda Geometry */}
       <RotundaGeometry radius={10} columnCount={12} />
-
-      {/* Invisible clickable door areas - larger on mobile */}
-      {DOORS.map((door) => (
-        <mesh
-          key={door.key}
-          position={[door.position[0], responsive.isMobile ? 3.2 : 3, door.position[2]]}
-          rotation={door.rotation}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDoorClick(door);
-            // Haptic feedback on mobile
-            if (responsive.isMobile && 'vibrate' in navigator) {
-              navigator.vibrate(50);
-            }
-          }}
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            if (!responsive.isMobile) {
-              document.body.style.cursor = 'pointer';
-            }
-          }}
-          onPointerOut={(e) => {
-            e.stopPropagation();
-            document.body.style.cursor = 'default';
-          }}
-        >
-          <planeGeometry args={responsive.isMobile ? [3.6, 7.2] : [3.1, 6.4]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} depthTest={false} />
-        </mesh>
-      ))}
 
       {/* Atmospheric dust particles */}
       <points ref={particlesRef}>

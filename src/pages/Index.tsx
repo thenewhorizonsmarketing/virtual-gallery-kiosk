@@ -1,4 +1,4 @@
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { MuseumScene } from '@/components/MuseumScene';
 import { LibraryRoom } from '@/components/rooms/LibraryRoom';
@@ -9,42 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrbitControls } from '@react-three/drei';
 import { useResponsive } from '@/hooks/useResponsive';
 import { DOORWAYS, type Doorway } from '@/data/doorways';
-
-const ROOM_CONTENT: Record<string, { title: string; items: Array<{ title: string; description: string }> }> = {
-  'Alumni/Class Composites': {
-    title: 'Alumni/Class Composites',
-    items: [
-      { title: 'Class of 2023', description: 'Recent graduates and their achievements' },
-      { title: 'Class of 2020', description: 'Celebrating our alumni' },
-      { title: 'Class of 2015', description: 'A decade of success' },
-    ],
-  },
-  'Publications (Amicus, Legal Eye, Law Review, Directory)': {
-    title: 'Publications (Amicus, Legal Eye, Law Review, Directory)',
-    items: [
-      { title: 'Amicus Newsletter', description: 'Latest legal insights and updates' },
-      { title: 'Legal Eye Journal', description: 'Student perspectives on law' },
-      { title: 'Law Review', description: 'Scholarly articles and analysis' },
-      { title: 'Law School Directory', description: 'Comprehensive faculty and student listings' },
-    ],
-  },
-  'Historical Photos/Archives': {
-    title: 'Historical Photos/Archives',
-    items: [
-      { title: 'Founding Years', description: 'The establishment of MC Law School' },
-      { title: 'Notable Cases', description: 'Historic legal proceedings' },
-      { title: 'Campus Evolution', description: 'How our facilities have grown' },
-    ],
-  },
-  'Faculty & Staff': {
-    title: 'Faculty & Staff',
-    items: [
-      { title: 'Dean of Law', description: 'Leadership and vision for the school' },
-      { title: 'Distinguished Professors', description: 'Meet our expert faculty' },
-      { title: 'Support Staff', description: 'The team behind student success' },
-    ],
-  },
-};
+import { ROOM_CONTENT } from '@/data/roomContent';
+import { useNavigate } from 'react-router-dom';
+import { DOOR_LINKS, type DoorKey } from '@/lib/scene/doorways';
 
 const Index = () => {
   const responsive = useResponsive();
@@ -55,13 +22,29 @@ const Index = () => {
   const [year] = useState(new Date().getFullYear());
   const [cameraKey, setCameraKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [queuedPath, setQueuedPath] = useState<string | null>(null);
+  const routerNavigate = useNavigate();
 
-  const handleDoorClick = (door: Doorway) => {
+  const queueNavigation = useCallback((path: string) => {
+    setQueuedPath(path);
+  }, []);
+
+  const clearNavigationQueue = useCallback(() => {
+    setQueuedPath(null);
+  }, []);
+
+  const handleDoorClick = useCallback((door: Doorway) => {
     setSelectedDoor(door);
     setSelectedRoom(door.key);
     setActiveRoom(null);
     setShowRoomPanel(false); // Hide panel during transition
-  };
+    const doorKey = door.shortTitle as DoorKey;
+    if (doorKey && DOOR_LINKS[doorKey]) {
+      queueNavigation(DOOR_LINKS[doorKey]);
+    } else {
+      clearNavigationQueue();
+    }
+  }, [queueNavigation, clearNavigationQueue]);
 
   const handleCloseRoom = () => {
     setSelectedDoor(null);
@@ -70,10 +53,23 @@ const Index = () => {
     setShowRoomPanel(false);
   };
   
-  const handleZoomComplete = (roomKey: string) => {
-    setActiveRoom(roomKey);
-    setShowRoomPanel(true);
-  };
+  const handleZoomComplete = useCallback((roomKey: string) => {
+    let path = queuedPath;
+    if (!path) {
+      const fallbackDoor = DOORWAYS.find((door) => door.key === roomKey);
+      if (fallbackDoor) {
+        const fallbackKey = fallbackDoor.shortTitle as DoorKey;
+        if (fallbackKey && DOOR_LINKS[fallbackKey]) {
+          path = DOOR_LINKS[fallbackKey];
+        }
+      }
+    }
+
+    if (path) {
+      routerNavigate(path);
+      clearNavigationQueue();
+    }
+  }, [queuedPath, routerNavigate, clearNavigationQueue]);
 
   const handleResetCamera = () => {
     setSelectedDoor(null);
@@ -172,10 +168,11 @@ const Index = () => {
               onCreated={() => setIsLoading(false)}
             >
               <Suspense fallback={null}>
-                <MuseumScene 
-                  onDoorClick={handleDoorClick} 
+                <MuseumScene
+                  onDoorClick={handleDoorClick}
                   selectedRoom={selectedRoom}
                   onZoomComplete={handleZoomComplete}
+                  navigateToPath={queueNavigation}
                 />
               </Suspense>
             </Canvas>
@@ -216,6 +213,31 @@ const Index = () => {
 
         {/* Overlay controls */}
         <div className="pointer-events-none absolute inset-0 z-[2]">
+          <nav aria-label="Doorway shortcuts" className="pointer-events-auto">
+            {Object.entries(DOOR_LINKS).map(([name, path]) => (
+              <a
+                key={name}
+                href={path}
+                aria-label={name}
+                className="sr-only-link"
+                onClick={(event) => {
+                  event.preventDefault();
+                  clearNavigationQueue();
+                  routerNavigate(path);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === ' ' || event.key === 'Spacebar') {
+                    event.preventDefault();
+                    clearNavigationQueue();
+                    routerNavigate(path);
+                  }
+                }}
+              >
+                {name}
+              </a>
+            ))}
+          </nav>
+
           <div className="flex flex-wrap items-center gap-2 p-2 md:p-3">
             <Button
               onClick={handleResetCamera}
@@ -223,19 +245,6 @@ const Index = () => {
             >
               Reset View
             </Button>
-            {DOORWAYS.map((door) => (
-              <Button
-                key={door.key}
-                asChild
-                size="sm"
-                variant="secondary"
-                className="pointer-events-auto bg-primary/40 text-primary-foreground shadow-[0_6px_18px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-colors hover:bg-primary/55"
-              >
-                <a href={door.link} target="_blank" rel="noreferrer">
-                  {door.shortTitle} ↗
-                </a>
-              </Button>
-            ))}
           </div>
 
           {/* Hint text */}
