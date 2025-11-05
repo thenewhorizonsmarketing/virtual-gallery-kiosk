@@ -9,7 +9,10 @@ interface RotundaGeometryProps {
 }
 
 // 4 doorway positions at cardinal directions (sourced from shared doorway config)
-const DOORWAY_ANGLES = DOORWAYS.map((door) => door.angle);
+// Keep a sorted list of doorway angles so adjacent-door calculations remain accurate
+const DOORWAY_ANGLES = [...DOORWAYS]
+  .map((door) => door.angle)
+  .sort((a, b) => a - b);
 const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
 
 interface DoorwayLabelTextProps {
