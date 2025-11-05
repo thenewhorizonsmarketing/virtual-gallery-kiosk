@@ -282,7 +282,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
           }}
         >
           <planeGeometry args={responsive.isMobile ? [3.2, 6.8] : [2.6, 6]} />
-          <meshBasicMaterial transparent opacity={0} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} depthTest={false} />
         </mesh>
       ))}
 
