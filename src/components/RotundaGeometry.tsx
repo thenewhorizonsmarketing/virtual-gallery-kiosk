@@ -111,36 +111,60 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
       </group>
 
       {/* Columns with square plinths - positioned in wall segments only */}
-      {columnPositions.map((pos, i) => (
-        <group key={`column-${i}`} position={[pos.x, 0, pos.z]}>
-          {/* Square plinth base */}
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.8, 0.8, 0.8]} />
-            <meshStandardMaterial 
-              color="#D3D3D3"
-              roughness={0.6}
-            />
-          </mesh>
+      {columnPositions.map((pos, i) => {
+        const FLOOR_Y = 0;
+        const CEILING_HEIGHT = 8;
+        const BASE_HEIGHT = 0.6;
+        const CAPITAL_HEIGHT = 0.45;
+        const ABACUS_HEIGHT = 0.15;
+        const SHAFT_HEIGHT = CEILING_HEIGHT - BASE_HEIGHT - CAPITAL_HEIGHT - ABACUS_HEIGHT;
 
-          {/* Round column */}
-          <mesh position={[0, 3, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.35, 0.35, 5, 16]} />
-            <meshStandardMaterial 
-              color="#E8E8E8"
-              roughness={0.5}
-            />
-          </mesh>
+        const baseY = FLOOR_Y + BASE_HEIGHT / 2;
+        const shaftY = FLOOR_Y + BASE_HEIGHT + SHAFT_HEIGHT / 2;
+        const capitalY = FLOOR_Y + BASE_HEIGHT + SHAFT_HEIGHT + CAPITAL_HEIGHT / 2;
+        const abacusY = FLOOR_Y + BASE_HEIGHT + SHAFT_HEIGHT + CAPITAL_HEIGHT + ABACUS_HEIGHT / 2;
 
-          {/* Column capital (top) */}
-          <mesh position={[0, 5.6, 0]} castShadow>
-            <cylinderGeometry args={[0.5, 0.35, 0.4, 16]} />
-            <meshStandardMaterial 
-              color="#D3D3D3"
-              roughness={0.6}
-            />
-          </mesh>
-        </group>
-      ))}
+        return (
+          <group key={`column-${i}`} position={[pos.x, 0, pos.z]}>
+            {/* Square plinth base */}
+            <mesh castShadow receiveShadow position={[0, baseY, 0]}>
+              <boxGeometry args={[1, BASE_HEIGHT, 1]} />
+              <meshStandardMaterial
+                color="#D6CEC5"
+                roughness={0.55}
+              />
+            </mesh>
+
+            {/* Column shaft with subtle entasis */}
+            <mesh position={[0, shaftY, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.42, 0.35, SHAFT_HEIGHT, 32]} />
+              <meshStandardMaterial
+                color="#F5F1EA"
+                roughness={0.45}
+                metalness={0.05}
+              />
+            </mesh>
+
+            {/* Column capital (echinus) */}
+            <mesh position={[0, capitalY, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.55, 0.42, CAPITAL_HEIGHT, 32]} />
+              <meshStandardMaterial
+                color="#E0D6CB"
+                roughness={0.5}
+              />
+            </mesh>
+
+            {/* Column capital abacus */}
+            <mesh position={[0, abacusY, 0]} castShadow receiveShadow>
+              <boxGeometry args={[1.1, ABACUS_HEIGHT, 1.1]} />
+              <meshStandardMaterial
+                color="#D6CEC5"
+                roughness={0.5}
+              />
+            </mesh>
+          </group>
+        );
+      })}
 
 
       {/* Wall segments between doorways (with gaps for doorways) */}

@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -51,10 +51,14 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const particlesRef = useRef<THREE.Points>(null);
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
-  
+
   const initialCameraPos = useRef(new THREE.Vector3(0, 2.5, 0.01));
-  const targetCameraPos = useRef(new THREE.Vector3(0, 2.5, 0.01));
-  const isAnimating = useRef(false);
+  const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
+  const animationProgress = useRef(0);
+  const animationDuration = useRef(3);
+  const animationLookTarget = useRef(new THREE.Vector3(0, 2.5, 0));
+  const isAnimatingRef = useRef(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const hasNotifiedComplete = useRef(false);
 
   // Cleanup on unmount
@@ -112,21 +116,30 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     }
     
     // Only animate camera when actively transitioning to/from a door
-    if (isAnimating.current) {
-      // Smooth camera transition with easing
-      const lerpFactor = 1 - Math.pow(0.001, delta); // Smooth easing
-      camera.position.lerp(targetCameraPos.current, lerpFactor);
-      
-      // Check if animation is complete
-      const distance = camera.position.distanceTo(targetCameraPos.current);
-      if (distance < 0.01) {
-        isAnimating.current = false;
-        // Update target to current position to prevent snapping back
-        targetCameraPos.current.copy(camera.position);
-        // Force controls to update and re-enable
+    if (isAnimatingRef.current && animationCurve.current) {
+      animationProgress.current += delta / animationDuration.current;
+      const t = Math.min(animationProgress.current, 1);
+
+      const newPosition = animationCurve.current.getPoint(t);
+      camera.position.copy(newPosition);
+
+      if (controlsRef.current) {
+        const lerpFactor = 1 - Math.pow(0.001, delta);
+        controlsRef.current.target.lerp(animationLookTarget.current, lerpFactor);
+        controlsRef.current.update();
+      } else {
+        camera.lookAt(animationLookTarget.current);
+      }
+
+      if (t >= 1) {
+        isAnimatingRef.current = false;
+        setIsAnimating(false);
+
         if (controlsRef.current) {
+          controlsRef.current.target.copy(animationLookTarget.current);
           controlsRef.current.update();
         }
+
         if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
           hasNotifiedComplete.current = true;
           onZoomComplete(selectedRoom);
@@ -134,32 +147,60 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       }
     }
   });
-  
+
   useEffect(() => {
+    const startAnimation = (points: THREE.Vector3[], lookTarget: THREE.Vector3, duration: number) => {
+      animationCurve.current = new THREE.CatmullRomCurve3(points);
+      animationCurve.current.curveType = 'catmullrom';
+      animationCurve.current.tension = 0.6;
+      animationProgress.current = 0;
+      animationDuration.current = duration;
+      animationLookTarget.current.copy(lookTarget);
+      isAnimatingRef.current = true;
+      setIsAnimating(true);
+    };
+
     if (selectedRoom) {
       const door = DOORS.find(d => d.key === selectedRoom);
       if (door) {
-        const newTarget = new THREE.Vector3(door.position[0], 2, door.position[2] + 2.5);
-        const distance = camera.position.distanceTo(newTarget);
-        
-        // Only animate if we're actually moving somewhere (distance > 0.5 units)
-        if (distance > 0.5) {
-          targetCameraPos.current.copy(newTarget);
-          isAnimating.current = true;
-          hasNotifiedComplete.current = false;
-        }
+        const doorDirection = new THREE.Vector3(door.position[0], 0, door.position[2]).normalize();
+        const start = camera.position.clone();
+        const liftOffset = new THREE.Vector3(0, 0.4, 0);
+
+        const approachDistance = 4.5;
+        const thresholdDistance = 9.5;
+        const exitDistance = 12;
+
+        const approachPoint = doorDirection.clone().multiplyScalar(approachDistance).add(new THREE.Vector3(0, 2.4, 0));
+        const doorwayPoint = doorDirection.clone().multiplyScalar(thresholdDistance).add(new THREE.Vector3(0, 2.2, 0));
+        const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.1, 0));
+
+        const points = [
+          start.clone(),
+          start.clone().add(liftOffset),
+          approachPoint,
+          doorwayPoint,
+          exitPoint,
+        ];
+
+        const lookTarget = doorDirection.clone().multiplyScalar(exitDistance + 2).add(new THREE.Vector3(0, 2.2, 0));
+
+        startAnimation(points, lookTarget, responsive.isMobile ? 3.8 : 3.2);
+        hasNotifiedComplete.current = false;
       }
     } else {
       const distance = camera.position.distanceTo(initialCameraPos.current);
-      
-      // Only animate back to center if we're not already there
       if (distance > 0.5) {
-        targetCameraPos.current.copy(initialCameraPos.current);
-        isAnimating.current = true;
+        const start = camera.position.clone();
+        const mid = start.clone().lerp(initialCameraPos.current, 0.5).add(new THREE.Vector3(0, 0.6, 0));
+        const points = [start, mid, initialCameraPos.current.clone()];
+        const lookTarget = new THREE.Vector3(0, 2.5, 0);
+
+        startAnimation(points, lookTarget, responsive.isMobile ? 2.6 : 2.2);
         hasNotifiedComplete.current = false;
       }
     }
-  }, [selectedRoom, camera]);
+  }, [selectedRoom, camera, responsive.isMobile]);
 
   return (
     <>
@@ -219,7 +260,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       {DOORS.map((door) => (
         <mesh
           key={door.key}
-          position={door.position}
+          position={[door.position[0], responsive.isMobile ? 3.2 : 3, door.position[2]]}
           rotation={door.rotation}
           onClick={(e) => {
             e.stopPropagation();
@@ -240,7 +281,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
             document.body.style.cursor = 'default';
           }}
         >
-          <planeGeometry args={responsive.isMobile ? [2.5, 5] : [2, 4]} />
+          <planeGeometry args={responsive.isMobile ? [3.2, 6.8] : [2.6, 6]} />
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       ))}
@@ -261,7 +302,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
       <OrbitControls
         ref={controlsRef}
-        enabled={!isAnimating.current}
+        enabled={!isAnimating}
         target={[0, 2.5, 0]}
         enablePan={false}
         enableZoom={true}
