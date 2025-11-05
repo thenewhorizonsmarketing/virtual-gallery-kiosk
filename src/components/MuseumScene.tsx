@@ -39,7 +39,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const { camera, gl, scene } = useThree();
 
   const initialCameraPos = useRef(new THREE.Vector3(6, 2.5, 0));
-  const initialLookTarget = useRef(new THREE.Vector3(-9, 2.5, 0));
+  const initialLookTarget = useRef(new THREE.Vector3(0, 2.5, 0));
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
@@ -62,10 +62,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     camera.position.copy(initialCameraPos.current);
     camera.lookAt(initialLookTarget.current);
 
-    if (controlsRef.current) {
-      controlsRef.current.target.copy(initialLookTarget.current);
-      controlsRef.current.update();
-    }
+      if (controlsRef.current) {
+        controlsRef.current.target.copy(initialLookTarget.current);
+        controlsRef.current.update();
+      }
   }, [camera]);
 
   useEffect(() => {
@@ -307,7 +307,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={[-9, 2.5, 0]}
+        target={[0, 2.5, 0]}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
