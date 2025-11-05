@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo } from 'react';
 import { Text } from '@react-three/drei';
 
 interface RotundaGeometryProps {
@@ -13,8 +13,6 @@ const DOORWAY_WIDTH = Math.PI / 6; // Width of each doorway opening (30 degrees)
 const DOORWAY_TITLES = ['Alumni', 'Publications', 'Archives', 'Faculty'];
 
 export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeometryProps) {
-  const textRefs = useRef<any[]>([]);
-  
   // Calculate column positions - only between doorways
   const columnPositions = useMemo(() => {
     const positions: Array<{ x: number; z: number; angle: number }> = [];
@@ -51,17 +49,6 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
     }
     
     return positions;
-  }, [radius]);
-
-  // Apply curveRadius to text elements via ref
-  useEffect(() => {
-    const textRadius = radius + 0.48;
-    textRefs.current.forEach((textRef) => {
-      if (textRef) {
-        textRef.curveRadius = -textRadius;
-        textRef.sync?.();
-      }
-    });
   }, [radius]);
 
   return (
@@ -207,8 +194,8 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
         return (
           <group key={`doorway-title-${i}`} rotation={[0, angle, 0]} renderOrder={10}>
             <Text
-              ref={(el) => (textRefs.current[i] = el)}
-              position={[0, 5.6, 0]}
+              position={[textRadius, 5.6, 0]}
+              rotation={[0, -Math.PI / 2, 0]}
               fontSize={0.9}
               color="#2C3E50"
               anchorX="center"
@@ -219,6 +206,7 @@ export function RotundaGeometry({ radius = 10, columnCount = 12 }: RotundaGeomet
               outlineWidth={0.02}
               outlineColor="#FFFFFF"
               depthOffset={-1}
+              curveRadius={-textRadius}
             >
               {title}
             </Text>
