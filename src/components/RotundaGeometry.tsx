@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { useEffect, useMemo, useRef } from 'react';
 import { Text } from '@react-three/drei';
+import type { Text as TroikaText } from 'troika-three-text';
 import { DOORWAYS } from '@/data/doorways';
 
 interface RotundaGeometryProps {
@@ -22,7 +23,7 @@ interface DoorwayLabelTextProps {
 }
 
 function DoorwayLabelText({ title, textRadius, arcLength }: DoorwayLabelTextProps) {
-  const textRef = useRef<any>(null);
+  const textRef = useRef<TroikaText | null>(null);
 
   useEffect(() => {
     if (textRef.current) {

@@ -9,26 +9,41 @@ import Publications from "./pages/Publications";
 import Archives from "./pages/Archives";
 import Faculty from "./pages/Faculty";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/admin/Login";
+import AlumniImport from "./pages/admin/AlumniImport";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/alumni" element={<Alumni />} />
-          <Route path="/publications" element={<Publications />} />
-          <Route path="/archives" element={<Archives />} />
-          <Route path="/faculty" element={<Faculty />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/alumni" element={<Alumni />} />
+            <Route path="/publications" element={<Publications />} />
+            <Route path="/archives" element={<Archives />} />
+            <Route path="/faculty" element={<Faculty />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin/alumni-import"
+              element={(
+                <ProtectedRoute>
+                  <AlumniImport />
+                </ProtectedRoute>
+              )}
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

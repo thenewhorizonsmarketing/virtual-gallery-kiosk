@@ -6,7 +6,6 @@ import { ArchiveRoom } from '@/components/rooms/ArchiveRoom';
 import { OfficeRoom } from '@/components/rooms/OfficeRoom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { OrbitControls } from '@react-three/drei';
 import { useResponsive } from '@/hooks/useResponsive';
 import { DOORWAYS, type Doorway } from '@/data/doorways';
 import { ROOM_CONTENT } from '@/data/roomContent';
@@ -84,13 +83,17 @@ const Index = () => {
   };
 
   const handleFullscreen = () => {
-    const elem = document.documentElement;
+    const elem = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void> | void;
+      msRequestFullscreen?: () => Promise<void> | void;
+    };
+
     if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if ((elem as any).webkitRequestFullscreen) {
-      (elem as any).webkitRequestFullscreen();
-    } else if ((elem as any).msRequestFullscreen) {
-      (elem as any).msRequestFullscreen();
+      void elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
     }
   };
 
