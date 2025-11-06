@@ -186,10 +186,13 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     if (selectedRoom) {
       const door = DOORS.find(d => d.key === selectedRoom);
       if (door) {
-        const doorDirection = new THREE.Vector3(door.position[0], 0, door.position[2]).normalize();
         const start = camera.position.clone();
-        const liftOffset = new THREE.Vector3(0, 0.4, 0);
-
+        const doorDirection = new THREE.Vector3(door.position[0], 0, door.position[2]).normalize();
+        
+        // Calculate angle between current position and target door
+        const currentDirection = new THREE.Vector3(start.x, 0, start.z).normalize();
+        const angleToTarget = currentDirection.angleTo(doorDirection);
+        
         const approachDistance = 4.5;
         const thresholdDistance = 9.5;
         const exitDistance = 12;
@@ -199,19 +202,21 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.5, 0));
 
         const horizontalDistanceFromCenter = Math.hypot(start.x, start.z);
-        const isNearCenter = horizontalDistanceFromCenter < 5;
+        
+        // If we're far from center OR far from target door direction, route through center
+        const needsCenterTransit = horizontalDistanceFromCenter > 5 || angleToTarget > Math.PI / 3;
 
-        const points = isNearCenter
+        const points = needsCenterTransit
           ? [
               start.clone(),
-              start.clone().add(liftOffset),
+              new THREE.Vector3(0, 2.8, 0),
               approachPoint,
               doorwayPoint,
               exitPoint,
             ]
           : [
               start.clone(),
-              new THREE.Vector3(0, 2.8, 0),
+              start.clone().add(new THREE.Vector3(0, 0.4, 0)),
               approachPoint,
               doorwayPoint,
               exitPoint,
@@ -307,7 +312,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={[-9, 2.5, 0]}
+        target={initialLookTarget.current.toArray()}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}

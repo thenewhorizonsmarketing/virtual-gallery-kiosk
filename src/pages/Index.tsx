@@ -108,14 +108,17 @@ const Index = () => {
   const getRoomComponent = () => {
     if (!activeRoom) return null;
     
-    if (activeRoom.includes('Alumni') || activeRoom.includes('Publications')) {
-      return <LibraryRoom />;
-    } else if (activeRoom.includes('Historical') || activeRoom.includes('Archives')) {
-      return <ArchiveRoom />;
-    } else if (activeRoom.includes('Faculty')) {
-      return <OfficeRoom />;
+    switch(activeRoom) {
+      case 'Alumni':
+      case 'Publications':
+        return <LibraryRoom />;
+      case 'Archives':
+        return <ArchiveRoom />;
+      case 'Faculty':
+        return <OfficeRoom />;
+      default:
+        return <LibraryRoom />;
     }
-    return <LibraryRoom />; // Default fallback
   };
 
   return (

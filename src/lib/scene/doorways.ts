@@ -201,12 +201,7 @@ export function enableDoorwayInteractions({
 
   const activateDoor = (key: DoorKey) => {
     onDoorActivated?.(key);
-    const path = DOOR_LINKS[key];
-    if (navigate) {
-      navigate(path);
-    } else {
-      window.location.href = path;
-    }
+    // Navigation is handled by parent after animation completes
   };
 
   const handleClick = (event: MouseEvent) => {

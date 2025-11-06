@@ -9,7 +9,7 @@ export interface Doorway {
 
 export const DOORWAYS: Doorway[] = [
   {
-    key: 'Alumni/Class Composites',
+    key: 'Alumni',
     title: 'Alumni / Class Composites',
     shortTitle: 'Alumni',
     description: 'Historic class portraits and alumni achievements',
@@ -17,7 +17,7 @@ export const DOORWAYS: Doorway[] = [
     link: 'https://law.mc.edu/alumni/class-composites/',
   },
   {
-    key: 'Publications (Amicus, Legal Eye, Law Review, Directory)',
+    key: 'Publications',
     title: 'Publications',
     shortTitle: 'Publications',
     description: 'Student and faculty publications, journals, and newsletters',
@@ -25,7 +25,7 @@ export const DOORWAYS: Doorway[] = [
     link: 'https://law.mc.edu/publications/',
   },
   {
-    key: 'Historical Photos/Archives',
+    key: 'Archives',
     title: 'Historical Photos / Archives',
     shortTitle: 'Archives',
     description: 'Photographic and archival collections from MC Law history',
@@ -33,7 +33,7 @@ export const DOORWAYS: Doorway[] = [
     link: 'https://law.mc.edu/library/archives/',
   },
   {
-    key: 'Faculty & Staff',
+    key: 'Faculty',
     title: 'Faculty & Staff',
     shortTitle: 'Faculty',
     description: 'Profiles and contact information for MC Law faculty and staff',
