@@ -55,9 +55,13 @@ function findLabelForDoor(root: THREE.Object3D, key: DoorKey) {
       : typeof obj.userData?.text === 'string'
         ? String(obj.userData.text).toLowerCase()
         : undefined;
-    const textContent = typeof (obj as any).text === 'string'
-      ? String((obj as any).text).toLowerCase()
-      : undefined;
+
+    const textContent = (() => {
+      const textCandidate = obj as THREE.Object3D & { text?: unknown };
+      return typeof textCandidate.text === 'string'
+        ? textCandidate.text.toLowerCase()
+        : undefined;
+    })();
 
     if (directName === needle || userDataText === needle || textContent === needle) {
       label = obj;

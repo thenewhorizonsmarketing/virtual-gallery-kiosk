@@ -1,6 +1,7 @@
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 import { useResponsive } from '@/hooks/useResponsive';
 import { RotundaGeometry } from './RotundaGeometry';
@@ -35,7 +36,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const responsive = useResponsive();
 
   const particlesRef = useRef<THREE.Points>(null);
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const { camera, gl, scene } = useThree();
 
   const initialCameraPos = useRef(new THREE.Vector3(-2.6, 2.8, 5.2));
