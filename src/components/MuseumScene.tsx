@@ -38,8 +38,8 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera, gl, scene } = useThree();
 
-  const initialCameraPos = useRef(new THREE.Vector3(6, 2.5, 0));
-  const initialLookTarget = useRef(new THREE.Vector3(0, 2.5, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(3, 2.5, 0));
+  const initialLookTarget = useRef(new THREE.Vector3(-9, 2.5, 0));
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
@@ -175,7 +175,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     const startAnimation = (points: THREE.Vector3[], lookTarget: THREE.Vector3, duration: number) => {
       animationCurve.current = new THREE.CatmullRomCurve3(points);
       animationCurve.current.curveType = 'catmullrom';
-      animationCurve.current.tension = 0.6;
+      animationCurve.current.tension = 0.5;
       animationProgress.current = 0;
       animationDuration.current = duration;
       animationLookTarget.current.copy(lookTarget);
@@ -199,7 +199,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.5, 0));
 
         const horizontalDistanceFromCenter = Math.hypot(start.x, start.z);
-        const isNearCenter = horizontalDistanceFromCenter < 6;
+        const isNearCenter = horizontalDistanceFromCenter < 5;
 
         const points = isNearCenter
           ? [
@@ -307,7 +307,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={[0, 2.5, 0]}
+        target={[-9, 2.5, 0]}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
