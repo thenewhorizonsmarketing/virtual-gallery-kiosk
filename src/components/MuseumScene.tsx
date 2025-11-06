@@ -172,6 +172,9 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   });
 
   useEffect(() => {
+    // Ignore clicks during animation to prevent overlapping paths
+    if (isAnimatingRef.current) return;
+
     const startAnimation = (points: THREE.Vector3[], lookTarget: THREE.Vector3, duration: number) => {
       animationCurve.current = new THREE.CatmullRomCurve3(points);
       animationCurve.current.curveType = 'catmullrom';
@@ -189,9 +192,14 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const start = camera.position.clone();
         const doorDirection = new THREE.Vector3(door.position[0], 0, door.position[2]).normalize();
         
-        // Calculate angle between current position and target door
-        const currentDirection = new THREE.Vector3(start.x, 0, start.z).normalize();
-        const angleToTarget = currentDirection.angleTo(doorDirection);
+        // Calculate distance and angle safely
+        const horizontalDistanceFromCenter = Math.hypot(start.x, start.z);
+        let angleToTarget = 0;
+        
+        if (horizontalDistanceFromCenter >= 0.25) {
+          const currentRadial = new THREE.Vector3(start.x, 0, start.z).normalize();
+          angleToTarget = currentRadial.angleTo(doorDirection);
+        }
         
         const approachDistance = 4.5;
         const thresholdDistance = 9.5;
@@ -200,11 +208,9 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         const approachPoint = doorDirection.clone().multiplyScalar(approachDistance).add(new THREE.Vector3(0, 2.5, 0));
         const doorwayPoint = doorDirection.clone().multiplyScalar(thresholdDistance).add(new THREE.Vector3(0, 2.5, 0));
         const exitPoint = doorDirection.clone().multiplyScalar(exitDistance).add(new THREE.Vector3(0, 2.5, 0));
-
-        const horizontalDistanceFromCenter = Math.hypot(start.x, start.z);
         
-        // If we're far from center OR far from target door direction, route through center
-        const needsCenterTransit = horizontalDistanceFromCenter > 5 || angleToTarget > Math.PI / 3;
+        // Route through center only if far from center or on opposite side
+        const needsCenterTransit = horizontalDistanceFromCenter > 6 || angleToTarget > Math.PI * 0.5;
 
         const points = needsCenterTransit
           ? [
@@ -312,13 +318,12 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
-        target={initialLookTarget.current.toArray()}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
         maxDistance={15}
-        minPolarAngle={Math.PI * 0.45}
-        maxPolarAngle={Math.PI * 0.55}
+        minPolarAngle={Math.PI * 0.4}
+        maxPolarAngle={Math.PI * 0.6}
         rotateSpeed={responsive.isMobile ? 0.7 : 0.5}
         enableDamping
         dampingFactor={responsive.isMobile ? 0.08 : 0.06}
