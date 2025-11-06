@@ -40,6 +40,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
 
   const initialCameraPos = useRef(new THREE.Vector3(3, 2.5, 0));
   const initialLookTarget = useRef(new THREE.Vector3(-9, 2.5, 0));
+  
+  // Create stable target array for OrbitControls
+  const stableTargetArray = useMemo(() => [-9, 2.5, 0] as [number, number, number], []);
+  
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
   const animationDuration = useRef(3);
@@ -318,6 +322,7 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
       <OrbitControls
         ref={controlsRef}
         enabled={!isAnimating}
+        target={stableTargetArray}
         enablePan={false}
         enableZoom={true}
         minDistance={0.01}
