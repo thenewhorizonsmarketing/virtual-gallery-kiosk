@@ -38,11 +38,11 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
   const controlsRef = useRef<any>(null);
   const { camera, gl, scene } = useThree();
 
-  const initialCameraPos = useRef(new THREE.Vector3(3, 2.5, 0));
-  const initialLookTarget = useRef(new THREE.Vector3(-9, 2.5, 0));
+  const initialCameraPos = useRef(new THREE.Vector3(-2.6, 2.8, 5.2));
+  const initialLookTarget = useRef(new THREE.Vector3(0, 2.5, 0));
   
   // Create stable target array for OrbitControls
-  const stableTargetArray = useMemo(() => [-9, 2.5, 0] as [number, number, number], []);
+  const stableTargetArray = useMemo(() => [0, 2.5, 0] as [number, number, number], []);
   
   const animationCurve = useRef<THREE.CatmullRomCurve3 | null>(null);
   const animationProgress = useRef(0);
@@ -66,10 +66,10 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
     camera.position.copy(initialCameraPos.current);
     camera.lookAt(initialLookTarget.current);
 
-      if (controlsRef.current) {
-        controlsRef.current.target.copy(initialLookTarget.current);
-        controlsRef.current.update();
-      }
+    if (controlsRef.current) {
+      controlsRef.current.target.copy(initialLookTarget.current);
+      controlsRef.current.update();
+    }
   }, [camera]);
 
   useEffect(() => {
@@ -163,14 +163,14 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         setIsAnimating(false);
 
         if (controlsRef.current) {
-          controlsRef.current.target.copy(initialLookTarget.current);
+          controlsRef.current.target.copy(animationLookTarget.current);
           controlsRef.current.update();
         }
 
-        // Small delay to ensure smooth transition back to center orbit
+        // Small delay to ensure smooth transition back to the active orbit target
         setTimeout(() => {
           if (controlsRef.current) {
-            controlsRef.current.target.copy(initialLookTarget.current);
+            controlsRef.current.target.copy(animationLookTarget.current);
             controlsRef.current.update();
           }
         }, 100);
