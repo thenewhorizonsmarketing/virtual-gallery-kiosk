@@ -163,9 +163,17 @@ export function MuseumScene({ onDoorClick, onResetCamera, selectedRoom, onZoomCo
         setIsAnimating(false);
 
         if (controlsRef.current) {
-          controlsRef.current.target.copy(animationLookTarget.current);
+          controlsRef.current.target.copy(initialLookTarget.current);
           controlsRef.current.update();
         }
+
+        // Small delay to ensure smooth transition back to center orbit
+        setTimeout(() => {
+          if (controlsRef.current) {
+            controlsRef.current.target.copy(initialLookTarget.current);
+            controlsRef.current.update();
+          }
+        }, 100);
 
         if (selectedRoom && !hasNotifiedComplete.current && onZoomComplete) {
           hasNotifiedComplete.current = true;
